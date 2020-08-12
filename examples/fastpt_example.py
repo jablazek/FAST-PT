@@ -77,7 +77,6 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_ylabel(r'$P(k)$', size=30)
 ax.set_xlabel(r'$k$', size=30)
-
 ax.plot(k,abs(P_IA_tidal[0]),label='0')
 ax.plot(k,abs(P_IA_tidal[1]),label='1')
 ax.plot(k,abs(P_IA_tidal[2]),label='2')
