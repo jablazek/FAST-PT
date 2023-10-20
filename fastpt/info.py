@@ -2,4 +2,4 @@
 Place package information here. Because it is not a local package (e.g. __init__.py),
 the information is available whether the package is loaded from outside or inside the directory.
 '''
-__version__ = '3.2'
+__version__ = '3.1.2'
