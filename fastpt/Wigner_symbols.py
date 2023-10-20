@@ -61,7 +61,7 @@ def three_j(j,m):
 		return 0
 
 
-	PF= np.int((-1) ** int(j_1 - j_2 - m_3))
+	PF= int((-1) ** int(j_1 - j_2 - m_3))
 	M=-m_3;
 
 	a1 = j_1 + j_2 - j_3
@@ -116,7 +116,7 @@ def three_j(j,m):
 			*FL[int(j_1-i-m_1)] \
 			*FL[int(i  + j_3-j_2 + m_1)] \
 			*FL[int(j_1 +j_2 -j_3 -i)]
-		Sum=Sum+np.int((-1)**i)/float(denom)
+		Sum=Sum+int((-1)**i)/float(denom)
 
 
 	# might have to reset FL

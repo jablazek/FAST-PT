@@ -6,11 +6,16 @@ utilizes Fourier methods combined with analytic expressions to reduce the
 computation time to scale as N log N, where N is the number of grid points in
 the input linear power spectrum.
 
-
+NOTE: v3.1.0 (latest version on pip and conda) requires numpy version < 1.24. This is fixed in v3.1.1. pip and conda will be updated ASAP.
 
 Easy installation with pip:
 
 * `pip install fast-pt`
+* Note: use `--no-deps` if you use a conda python distribution, or just use conda installation
+
+Easy installation with conda:
+
+* `conda install fast-pt`
 
 Full installation with examples:
 
