@@ -31,9 +31,9 @@ jobs:
       - name: Build sdist
         run: |
           python setup.py sdist
-          cp wheels/fast-pt* dist
+          cp wheels/fast_pt* dist
           ls -l dist
-          tar tvfz dist/fast-pt-*.tar.gz
+          tar tvfz dist/fast_pt-*.tar.gz
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
