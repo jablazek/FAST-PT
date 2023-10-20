@@ -15,7 +15,7 @@ print('FASTPT version is %s'%(fastpt_version))
 
 setup(
     name='fast-pt',
-    description="Fast cosmological perturbation theory"
+    description="Fast cosmological perturbation theory",
     long_description=(
         "FAST-PT is a code to calculate quantities in cosmological "
         "perturbation theory at 1-loop (including, e.g., corrections to the "
