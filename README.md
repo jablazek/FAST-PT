@@ -6,7 +6,7 @@ utilizes Fourier methods combined with analytic expressions to reduce the
 computation time to scale as N log N, where N is the number of grid points in
 the input linear power spectrum.
 
-NOTE: v3.1.0 (latest version on pip and conda) requires numpy version < 1.24. This is fixed in v3.1.1. pip and conda will be updated ASAP.
+NOTE: v3.1.0 and earlier require numpy version < 1.24. This is fixed in v3.1.1 and later, which is available on pip and conda.
 
 Easy installation with pip:
 

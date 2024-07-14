@@ -92,7 +92,7 @@ def filter_lowk(k,P_in,start,end):
 
 def BW_filter(P_in,order=3,nf=.01):
 
-	print 'at butter, freq=', nf
+	# print 'at butter, freq=', nf
 
 	B, A = butter(order, nf, 'low')
 
