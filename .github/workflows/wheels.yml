@@ -31,7 +31,7 @@ jobs:
       - name: Build sdist
         run: |
           python setup.py sdist
-          cp wheels/fast_pt* dist
+          cp wheels/fast-pt* dist
           ls -l dist
           tar tvfz dist/fast-pt-*.tar.gz
 
