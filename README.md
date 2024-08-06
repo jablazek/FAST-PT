@@ -1,12 +1,16 @@
 # FAST-PT
 
+NOTE: Active development has moved to https://github.com/jablazek/FAST-PT.
+
 FAST-PT is a code to calculate quantities in cosmological perturbation theory
 at 1-loop (including, e.g., corrections to the matter power spectrum). The code
 utilizes Fourier methods combined with analytic expressions to reduce the
 computation time to scale as N log N, where N is the number of grid points in
 the input linear power spectrum.
 
+
 NOTE: v3.1.0 and earlier require numpy version < 1.24. This is fixed in v3.1.1 and later, which is available on pip and conda.
+
 
 Easy installation with pip:
 
