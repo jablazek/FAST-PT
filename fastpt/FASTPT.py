@@ -44,7 +44,7 @@ from scipy.special import gamma
 from scipy.signal import fftconvolve
 import scipy.integrate as integrate
 from .fastpt_extr import p_window, c_window, pad_left, pad_right
-from .matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL
+from .matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, J2_integral, J3_integral
 from .initialize_params import scalar_stuff, tensor_stuff
 from .IA_tt import IA_tt
 from .IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
@@ -172,6 +172,7 @@ class FASTPT:
         self.OV_do = False
         self.kPol_do = False
         self.RSD_do = False
+        self.EFT_do = False
 
         for entry in to_do:  # convert to_do list to instructions for FAST-PT initialization
             if entry == 'one_loop_dd':
@@ -222,6 +223,9 @@ class FASTPT:
                 self.kPol_do = True
                 self.RSD_do = True
                 self.cleft = True
+                continue
+            elif entry == 'EFT':
+                self.EFT_do = True
                 continue
             else:
                 raise ValueError('FAST-PT does not recognize "' + entry + '" in the to_do list.')
@@ -304,6 +308,42 @@ class FASTPT:
             tabB, self.B_coeff = RSDB()
             p_mat = tabB[:, [0, 1, 5, 6, 7, 8, 9]]
             self.X_RSDB = tensor_stuff(p_mat, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
+        if self.EFT_do:
+            # Computes relevant quantities for all (22) integrals in EFT of IA theory.
+            nu = -2
+            p_mat_11 = np.array([[0, 0, 0, 0], [0, 0, 2, 0], [0, 0, 4, 0], [2, -2, 2, 0],
+                                 [1, -1, 1, 0], [1, -1, 3, 0], [2, -2, 0, 1]])
+            p_mat_12 = np.array([[0, 0, 0, 0], [0, 0, 2, 0], [0, 0, 4, 0], [1, -1, 1, 0],
+                                 [1, -1, 3, 0], [-1, 1, 1, 0], [-1, 1, 3, 0]
+            ])
+            p_mat_13 = np.array([[0, 0, 0, 0], [0, 0, 2, 0], [1, -1, 1, 0], [-1, 1, 1, 0]])
+            p_mat_22 = np.array([[0, 0, 0, 0], [0, 0, 2, 0], [0, 0, 4, 0]])
+            p_mat_23 = np.array([[0, 0, 0, 0], [0, 0, 2, 0]])
+            p_mat_24 = np.array([[2, 0, 0, 0], [2, 0, 2, 0], [2, 0, 4, 0], [1, 1, 1, 0],
+                                 [1, 1, 3, 0], [1, 1, 5, 0], [0, 2, 0, 0], [0, 2, 2, 0],
+                                 [0, 2, 4, 0]])
+            p_mat_33 = np.array([[0, 0, 0, 0]])
+            p_mat_34 = np.array([[2, 0, 0, 0], [2, 0, 2, 0], [1, 1, 1, 0,], [1, 1, 3, 0],
+                                 [0, 2, 0, 0], [0, 2, 2, 0]])
+            p_mat_44 = np.array([[4, 0, 0, 0,], [4, 0, 2, 0], [4, 0, 4, 0], [3, 1, 1, 0],
+                                 [3, 1, 3, 0], [3, 1, 5, 0], [2, 2, 0, 0], [2, 2, 2, 0],
+                                 [2, 2, 4, 0], [2, 2, 6, 0], [1, 3, 1, 0], [1, 3, 3, 0],
+                                 [1, 3, 5, 0], [0, 4, 0, 0], [0, 4, 2, 0], [0, 4, 4, 0]])
+            p_mat_55 = np.array([[4, 0, 0, 0], [4, 0, 2, 0], [4, 0, 4, 0], [2, 2, 0, 0],
+                                 [2, 2, 2, 0], [2, 2, 4, 0], [0, 4, 0, 0], [0, 4, 2, 0],
+                                 [0, 4, 4, 0]])
+
+            self.Jabl_I11 = scalar_stuff(p_mat_11, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I12 = scalar_stuff(p_mat_12, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I13 = scalar_stuff(p_mat_13, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I22 = scalar_stuff(p_mat_22, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I23 = scalar_stuff(p_mat_23, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I24 = scalar_stuff(p_mat_24, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I33 = scalar_stuff(p_mat_33, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I34 = scalar_stuff(p_mat_34, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I44 = scalar_stuff(p_mat_44, -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I55 = scalar_stuff(p_mat_55, -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
 
     ### Top-level functions to output final quantities ###
     def one_loop_dd(self, P, P_window=None, C_window=None):
@@ -701,6 +741,77 @@ class FASTPT:
         out_1loop = self.one_loop_dd(P_in, P_window=P_window, C_window=C_window)[0]
         # p1loop = interpolate.InterpolatedUnivariateSpline(k,out_1loop) # is this necessary? out_1loop should already be at the correct k spacing
         return psmooth(k) + out_1loop + pw(k) * exp(-k ** 2 * Sigma) * (1 + Sigma * k ** 2)
+
+    def eft_integrals(self, P, P_window=None, C_window=None):
+        # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
+        # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
+
+        # Coefficients for the (22)-type integrals:
+        coef_11 = [1219/1470., 671/1029., 32/1715., 1/3., 62/35., 8/35., 1/6.]
+        coef_12 = [31/105., 94/147., 16/245., 3/10., 1/5., 3/10., 1/5.]
+        coef_13 = [17/21., 4/21., 1/2., 1/2.]
+        coef_22 = [1/5., 4/7., 8/35.]
+        coef_23 = [1/3., 2/3.]
+        coef_24 = np.sqrt(2/3) * np.array([1/5., 4/7., 8/35., 3*13/35., 37/45,
+                                           4/63., 1/5., 4/7., 8/35.])
+        coef_33 = 1.
+        coef_34 = np.sqrt(2/3) * np.array([1/3., 2/3., 3*3/5., 1/5., 1/3., 2/3.])
+        coef_44 = [2/15., 8/21., 16/105., 52/35., 148/135., 16/189., 104/105., 152/63., 676/1155,
+                   8/693., 52/35., 148/135., 16/189., 2/15., 8/21., 16/105.]
+        coef_55 = [1/30., 1/42., -2/35., -1/15., -1/21., 4/35., 1/30., 1/42., -2/35.]
+
+        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
+            # Function to compute the final (22)-integrals:
+            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+            P_mat = np.multiply(coef, np.transpose(mat))
+            Inm = np.sum(P_mat, 1)
+            return Inm, Ps
+
+        # Compute the (22)-integrals
+        I11, Ps = get_Inm(P, coef_11, self.Jabl_I11, -2, C_window)
+        I12, _ = get_Inm(P, coef_12, self.Jabl_I12, -2, C_window)
+        I13, _ = get_Inm(P, coef_13, self.Jabl_I13, -2, C_window)
+        I22, _ = get_Inm(P, coef_22, self.Jabl_I22, -2, C_window)
+        I23, _ = get_Inm(P, coef_23, self.Jabl_I23, -2, C_window)
+        I24, _ = get_Inm(P, coef_24, self.Jabl_I24, -2, C_window)
+        I33, _ = get_Inm(P, coef_33, self.Jabl_I33, -2, C_window)
+        I34, _ = get_Inm(P, coef_34, self.Jabl_I34, -2, C_window)
+        I44, _ = get_Inm(P, coef_44, self.Jabl_I44, -1.6, C_window)
+        I55, _ = get_Inm(P, coef_55, self.Jabl_I55, -1.6, C_window)
+
+        I24 /= self.k_old**2
+        I34 /= self.k_old**2
+        I44 /= self.k_old**4
+        I55 /= self.k_old**4
+
+        # subtract the low-k limit of the integral:
+        I22 -= I22[0]
+        I23 -= I23[0]
+        I24 -= I24[0]
+        I33 -= I33[0]
+        I44 -= I44[0]
+        I55 -= I55[0]
+
+        # Compute the (13)-integrals:
+        J1 = P_13_reg(self.k_old, Ps)/2
+        J2 = J2_integral(self.k_old, Ps)
+        J3 = J3_integral(self.k_old, Ps)
+
+        _, I11 = self.EK.PK_original(I11)
+        _, I12 = self.EK.PK_original(I12)
+        _, I13 = self.EK.PK_original(I13)
+        _, I22 = self.EK.PK_original(I22)
+        _, I23 = self.EK.PK_original(I23)
+        _, I24 = self.EK.PK_original(I24)
+        _, I33 = self.EK.PK_original(I33)
+        _, I34 = self.EK.PK_original(I34)
+        _, I44 = self.EK.PK_original(I44)
+        _, I55 = self.EK.PK_original(I55)
+        _, J1 = self.EK.PK_original(J1)
+        _, J2 = self.EK.PK_original(J2)
+        _, J3 = self.EK.PK_original(J3)
+
+        return I11, I12, I13, I22, I23, I24, I33, I34, I44, I55, J1, J2, J3
 
     ######################################################################################
     ### functions that use the older version structures. ###
