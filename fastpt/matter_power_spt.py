@@ -153,3 +153,70 @@ def one_loop(k,P,P_window=None,C_window=None,n_pad=None):
 	return P1,P22_reg,P13_reg
 
 
+def J2_integral(k, P):
+	# calculates the J_2 integral in the EFT of IA
+	# via a discrete convolution integral
+
+	N = k.size
+	n = np.arange(-N+1, N)
+	dL = log(k[1])-log(k[0])
+	s = n*dL
+
+	cut = 4
+	high_s = s[s > cut]
+	low_s = s[s < -cut]
+	mid_high_s = s[(s <= cut) & (s > 0)]
+	mid_low_s = s[(s >= -cut) & (s < 0)]
+
+	Z = lambda r: (15/r-55*r-55*r**3+15*r**5 +
+				   (60-15/r**2-90*r**2+60*r**4-15*r**6)*log((r+1)/np.absolute(r-1))/2)
+	Z_low = lambda r: -128*r+384/7/r-128/21/r**3-128/231/r**5-128/1001/r**7
+	Z_high = lambda r: -128*r**3+384/7*r**5-128/21*r**7
+
+	f_mid_low = Z(exp(-mid_low_s))
+	f_mid_high = Z(exp(-mid_high_s))
+	f_high = Z_high(exp(-high_s))
+	f_low = Z_low(exp(-low_s))
+
+	f = np.hstack((f_low, f_mid_low, -80, f_mid_high, f_high))
+
+	g = fftconvolve(P, f) * dL
+	g_k = g[N-1:2*N-1]
+	P_bar = 1/42*k**3/(2*pi)**2*P*g_k
+
+	return P_bar
+
+
+def J3_integral(k, P):
+	# calculates the J_3 integral in the EFT of IA
+	# via a discrete convolution integral
+
+	N = k.size
+	n = np.arange(-N+1, N)
+	dL = log(k[1])-log(k[0])
+	s = n*dL
+
+	cut = 4
+	high_s = s[s > cut]
+	low_s = s[s < -cut]
+	mid_high_s = s[(s <= cut) & (s > 0)]
+	mid_low_s = s[(s >= -cut) & (s < 0)]
+
+	Z = lambda r: (15/r-10*r+164*r**3-150*r**5+45*r**7+
+				   (15-15/r**2+90*r**2-210*r**4+165*r**6-
+					45*r**8)*log((r+1)/np.absolute(r-1))/2)
+	Z_low = lambda r: 256/7*r+256/7/r-256/33/r**3-256/273/r**5-256/1001/r**7
+	Z_high = lambda r: 256*r**3-2304/7*r**5+3328/21*r**7
+
+	f_mid_low = Z(exp(-mid_low_s))
+	f_mid_high = Z(exp(-mid_high_s))
+	f_high = Z_high(exp(-high_s))
+	f_low = Z_low(exp(-low_s))
+
+	f = np.hstack((f_low, f_mid_low, 64, f_mid_high, f_high))
+
+	g = fftconvolve(P, f) * dL
+	g_k = g[N-1:2*N-1]
+	P_bar = 1/168*k**3/(2*pi)**2*P*g_k
+
+	return P_bar
