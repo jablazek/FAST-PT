@@ -44,11 +44,14 @@ from scipy.special import gamma
 from scipy.signal import fftconvolve
 import scipy.integrate as integrate
 from .fastpt_extr import p_window, c_window, pad_left, pad_right
-from .matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL
+from .matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, P_22
 from .initialize_params import scalar_stuff, tensor_stuff
 from .IA_tt import IA_tt
 from .IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
 from .IA_ta import IA_deltaE1, P_IA_deltaE2, IA_0E0E, IA_0B0B
+from .IA_ct import IA_tij_feG2, IA_tij_heG2, IA_tij_F2F2, IA_tij_G2G2, IA_tij_F2G2, P_IA_13G, P_IA_13F, P_22F_reg, P_22G_reg, IA_tij_F2G2reg
+from .IA_ctbias import IA_gb2_F2, IA_gb2_G2, IA_gb2_S2F2, IA_gb2_S2G2
+from .J_k import J_k
 from .OV import OV
 from .kPol import kPol
 from .RSD import RSDA, RSDB
@@ -172,6 +175,7 @@ class FASTPT:
         self.OV_do = False
         self.kPol_do = False
         self.RSD_do = False
+        self.IA_tij_do = False
 
         for entry in to_do:  # convert to_do list to instructions for FAST-PT initialization
             if entry == 'one_loop_dd':
@@ -190,6 +194,7 @@ class FASTPT:
                 self.IA_tt_do = True
                 self.IA_ta_do = True
                 self.IA_mix_do = True
+                self.IA_tij_do = True
                 continue
             elif entry == 'IA_tt':
                 self.IA_tt_do = True
@@ -212,6 +217,13 @@ class FASTPT:
             elif entry == 'IRres':
                 self.dd_do = True
                 continue
+            elif entry == 'tij':
+                self.IA_dd_do = True
+                self.IA_ta_do = True
+                self.IA_tt_do = True
+                self.IA_mix_do = True
+                self.IA_tij_do = True
+                continue
             elif entry == 'all' or entry == 'everything':
                 self.dd_do = True
                 self.dd_bias_do = True
@@ -222,6 +234,7 @@ class FASTPT:
                 self.kPol_do = True
                 self.RSD_do = True
                 self.cleft = True
+                self.IA_tij_do = True
                 continue
             else:
                 raise ValueError('FAST-PT does not recognize "' + entry + '" in the to_do list.')
@@ -238,6 +251,7 @@ class FASTPT:
 
             self.X_spt = scalar_stuff(p_mat, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.X_lpt = scalar_stuff(p_mat_lpt, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_sptG = scalar_stuff(p_mat, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
 
         if self.cleft:
             nu = -2
@@ -275,6 +289,39 @@ class FASTPT:
             self.X_IA_deltaE1 = tensor_stuff(p_mat_deltaE1, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.X_IA_0E0E = tensor_stuff(p_mat_0E0E, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.X_IA_0B0B = tensor_stuff(p_mat_0B0B, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        
+        if self.IA_tij_do:
+            IA_tij_feG2_tab = IA_tij_feG2()
+            IA_tij_heG2_tab = IA_tij_heG2()
+            IA_tij_F2F2_tab = IA_tij_F2F2()
+            IA_tij_G2G2_tab = IA_tij_G2G2()
+            IA_tij_F2G2_tab = IA_tij_F2G2()
+            IA_tij_F2G2reg_tab =IA_tij_F2G2reg()
+            IA_gb2_F2_tab = IA_gb2_F2()
+            IA_gb2_G2_tab = IA_gb2_G2()
+            IA_gb2_S2F2_tab = IA_gb2_S2F2()
+            IA_gb2_S2G2_tab = IA_gb2_S2G2()
+            p_mat_tij_feG2 = IA_tij_feG2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_tij_heG2 = IA_tij_heG2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_tij_F2F2 = IA_tij_F2F2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_tij_G2G2 = IA_tij_G2G2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_tij_F2G2 = IA_tij_F2G2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_tij_F2G2reg_tab = IA_tij_F2G2reg_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_gb2_F2 = IA_gb2_F2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_gb2_G2 = IA_gb2_G2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_gb2_S2F2 = IA_gb2_S2F2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            p_mat_gb2_S2G2 = IA_gb2_S2G2_tab[:, [0, 1, 5, 6, 7, 8, 9]]
+            self.X_IA_tij_feG2 = tensor_stuff(p_mat_tij_feG2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_tij_heG2 = tensor_stuff(p_mat_tij_heG2, self.N, self.m, self.eta_m, self.l, self.tau_l) 
+            self.X_IA_tij_F2F2 = tensor_stuff(p_mat_tij_F2F2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_tij_G2G2 = tensor_stuff(p_mat_tij_G2G2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_tij_F2G2 = tensor_stuff(p_mat_tij_F2G2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_tij_F2G2reg = tensor_stuff(p_mat_tij_F2G2reg_tab, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_gb2_F2 = tensor_stuff(p_mat_gb2_F2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_gb2_G2 = tensor_stuff(p_mat_gb2_G2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_gb2_S2F2 = tensor_stuff(p_mat_gb2_S2F2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.X_IA_gb2_S2G2 = tensor_stuff(p_mat_gb2_S2G2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
 
         if self.OV_do:
             # For OV, we can use two different values for
@@ -324,6 +371,8 @@ class FASTPT:
         P13 = P_13_reg(self.k_old, Ps)
         P_1loop = P22 + P13
 
+        
+
         if (self.dd_bias_do):
             # if dd_bias is in to_do, this function acts like one_loop_dd_bias
 
@@ -361,6 +410,10 @@ class FASTPT:
             _, P_1loop = self.EK.PK_original(P_1loop)
 
         return P_1loop, Ps
+
+
+
+
 
     def one_loop_dd_bias(self, P, P_window=None, C_window=None):
         nu = -2
@@ -592,6 +645,72 @@ class FASTPT:
     def IA_ak2(self, P, P_window=None, C_window=None):
         P_der = (self.k_original**2)*P
         return P_der
+    
+    def IA_ct(self,P,P_window=None, C_window=None):
+        P_feG2, A = self.J_k_tensor(P,self.X_IA_tij_feG2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_feG2 = self.EK.PK_original(P_feG2)
+        P_heG2, A = self.J_k_tensor(P,self.X_IA_tij_heG2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_heG2 = self.EK.PK_original(P_heG2)
+        P_F2F2, A = self.J_k_tensor(P,self.X_IA_tij_F2F2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_F2F2 = self.EK.PK_original(P_F2F2)
+        P_G2G2, A = self.J_k_tensor(P,self.X_IA_tij_G2G2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_G2G2 = self.EK.PK_original(P_G2G2)
+        P_F2G2, A = self.J_k_tensor(P,self.X_IA_tij_F2G2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_F2G2 = self.EK.PK_original(P_F2G2)
+        P_A00E,A,B,C = self.IA_ta(P, P_window=P_window, C_window=C_window)
+        P_A0E2,D,E,F = self.IA_mix(P,P_window=P_window, C_window=C_window)
+        P_13F = P_IA_13F(self.k_original, P)
+        P_13G = P_IA_13G(self.k_original,P,)
+        nu=-2
+        Ps, mat = self.J_k_scalar(P, self.X_spt, nu, P_window=P_window, C_window=C_window)
+        one_loop_coef = np.array(
+            [2 * 1219 / 1470., 2 * 671 / 1029., 2 * 32 / 1715., 2 * 1 / 3., 2 * 62 / 35., 2 * 8 / 35., 1 / 3.])
+        P22_mat = np.multiply(one_loop_coef, np.transpose(mat))
+        P_22F = np.sum(P22_mat, 1)
+
+        one_loop_coefG= np.array(
+            [2*1003/1470, 2*803/1029, 2*64/1715, 2*1/3, 2*58/35, 2*12/35, 1/3])
+        PsG, matG = self.J_k_scalar(P, self.X_sptG, nu, P_window=P_window, C_window=C_window)
+        P22G_mat = np.multiply(one_loop_coefG, np.transpose(matG))
+        P_22G = np.sum(P22G_mat, 1)
+        if (self.extrap):
+            _, P_22F=self.EK.PK_original(P_22F)
+            _, P_22G=self.EK.PK_original(P_22G)
+        P_tEtE = P_F2F2+P_G2G2-2*P_F2G2
+        P_0tE = P_22G-P_22F+P_13G-P_13F
+        P_0EtE = np.subtract(P_feG2,(1/2)*P_A00E)
+        P_E2tE = np.subtract(P_heG2,(1/2)*P_A0E2)
+            
+        return 2*P_0tE,2*P_0EtE,2*P_E2tE,2*P_tEtE
+    
+
+    def IA_ctbias(self,P,P_window=None, C_window=None):
+        P_F2, A = self.J_k_tensor(P,self.X_IA_gb2_F2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_F2 = self.EK.PK_original(P_F2)
+        P_G2, A = self.J_k_tensor(P,self.X_IA_gb2_G2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_G2 = self.EK.PK_original(P_G2)
+        P_d2tE = P_G2-P_F2
+        P_S2F2, A = self.J_k_tensor(P, self.X_IA_gb2_S2F2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_S2F2 = self.EK.PK_original(P_S2F2)
+
+        #P_13S2F2 = P_IA_13S2F2(self.k_original, P)
+
+        P_S2G2, A = self.J_k_tensor(P, self.X_IA_gb2_S2G2, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_S2G2 = self.EK.PK_original(P_S2G2)
+        P_s2tE=P_S2G2-P_S2F2
+
+        return 2*P_d2tE,2*P_s2tE
+
+
 
     def OV(self, P, P_window=None, C_window=None):
         P, A = self.J_k_tensor(P, self.X_OV, P_window=P_window, C_window=C_window)

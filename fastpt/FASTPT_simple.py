@@ -257,13 +257,13 @@ class FASTPT:
 
 	def one_loop(self,P,P_window=None,C_window=None):
 
-	    Ps,P22=self.P22(P,P_window,C_window)
-	    P13=P_13_reg(self.k_old,Ps)
-	    if (self.extrap):
-	        _,P=self.EK.PK_original(P22+P13)
-	        return P
+		Ps,P22=self.P22(P,P_window,C_window)
+		P13=P_13_reg(self.k_old,Ps)
+		if (self.extrap):
+			_,P=self.EK.PK_original(P22+P13)
+			return P
 
-	    return P22+P13
+		return P22+P13
 
 	def P_bias(self,P,P_window=None,C_window=None):
 		# Quadraric bias Legendre components
