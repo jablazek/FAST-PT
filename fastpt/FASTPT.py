@@ -49,6 +49,7 @@ from .initialize_params import scalar_stuff, tensor_stuff
 from .IA_tt import IA_tt
 from .IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
 from .IA_ta import IA_deltaE1, P_IA_deltaE2, IA_0E0E, IA_0B0B
+from .IA_nl_bias import P_d20E, A_s2E, B_s2E, P_s20E, P_d2E2, P_s2E2
 from .OV import OV
 from .kPol import kPol
 from .RSD import RSDA, RSDB
@@ -164,6 +165,8 @@ class FASTPT:
         self.tau_l = omega * self.l
 
         self.dd_do = False
+        self.nl_bias_do1 = False
+        self.nl_bias_do2 = False
         self.cleft = False
         self.dd_bias_do = False
         self.IA_tt_do = False
@@ -176,6 +179,11 @@ class FASTPT:
         for entry in to_do:  # convert to_do list to instructions for FAST-PT initialization
             if entry == 'one_loop_dd':
                 self.dd_do = True
+                continue
+
+            if entry == 'nl_bias':
+                self.nl_bias_do1 = True
+                self.nl_bias_do2 = True
                 continue
 
             if entry == 'one_loop_cleft_dd':
@@ -214,6 +222,8 @@ class FASTPT:
                 continue
             elif entry == 'all' or entry == 'everything':
                 self.dd_do = True
+                self.nl_bias_do1 = True
+                self.nl_bias_do2 = True
                 self.dd_bias_do = True
                 self.IA_tt_do = True
                 self.IA_ta_do = True
@@ -239,6 +249,11 @@ class FASTPT:
             self.X_spt = scalar_stuff(p_mat, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.X_lpt = scalar_stuff(p_mat_lpt, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
 
+        if self.nl_bias_do1:
+            nu = -2
+            p_mat1 = p_mat1 = np.array([[0, 0, 0, 0], [1, -1, 1, 0], [-1, 1, 1, 0], [0, 0, 2, 0]])
+            self.X_spt1 = scalar_stuff(p_mat1, nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
         if self.cleft:
             nu = -2
             p_mat = np.array([[0, 0, 0, 0], [0, 0, 2, 0], [0, 0, 4, 0], [1, -1, 1, 0], [1, -1, 3, 0], [-1, 1, 1, 0],
@@ -252,6 +267,24 @@ class FASTPT:
 
             self.X_IA_E = tensor_stuff(p_mat_E, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.X_IA_B = tensor_stuff(p_mat_B, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
+        if self.nl_bias_do2:
+            nl_bias_tab1 = P_d20E()
+            nl_bias_tab3 = A_s2E()
+            nl_bias_tab4 = P_s20E()
+            nl_bias_tab5 = P_d2E2()
+            nl_bias_tab6 = P_s2E2()
+            nl_bias_mat_1 = nl_bias_tab1[:, [0, 1, 5, 6, 7, 8, 9]]
+            nl_bias_mat_3 = nl_bias_tab3[:, [0, 1, 5, 6, 7, 8, 9]]
+            nl_bias_mat_4 = nl_bias_tab4[:, [0, 1, 5, 6, 7, 8, 9]]
+            nl_bias_mat_5 = nl_bias_tab5[:, [0, 1, 5, 6, 7, 8, 9]]
+            nl_bias_mat_6 = nl_bias_tab6[:, [0, 1, 5, 6, 7, 8, 9]]
+            self.X_nlb_1 = tensor_stuff(nl_bias_mat_1, self.N, self.m, self.eta_m, self.l, self.tau_l)   
+            self.X_nlb_3 = tensor_stuff(nl_bias_mat_3, self.N, self.m, self.eta_m, self.l, self.tau_l) 
+            self.X_nlb_4 = tensor_stuff(nl_bias_mat_4, self.N, self.m, self.eta_m, self.l, self.tau_l)   
+            self.X_nlb_5 = tensor_stuff(nl_bias_mat_5, self.N, self.m, self.eta_m, self.l, self.tau_l) 
+            self.X_nlb_6 = tensor_stuff(nl_bias_mat_6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
 
         if self.IA_mix_do:
             IA_A_tab = IA_A()
@@ -335,6 +368,8 @@ class FASTPT:
             # Uses standard "full initialization" of J terms
             sig4 = np.trapz(self.k_old ** 3 * Ps ** 2, x=np.log(self.k_old)) / (2. * pi ** 2)
             self.sig4 = sig4
+            sig2 = np.trapz(self.k_old**3*Ps,x=np.log(self.k_old))/(2.*pi**2)
+            self.sig2 = sig2
             # sig4 much more accurate when calculated in logk, especially for low-res input.
 
             Pd1d2 = 2. * (17. / 21 * mat[0, :] + mat[4, :] + 4. / 21 * mat[1, :])
@@ -354,7 +389,7 @@ class FASTPT:
                 _, Pd2s2 = self.EK.PK_original(Pd2s2)
                 _, Ps2s2 = self.EK.PK_original(Ps2s2)
 
-            return P_1loop, Ps, Pd1d2, Pd2d2, Pd1s2, Pd2s2, Ps2s2, sig4
+            return P_1loop, Ps, Pd1d2, Pd2d2, Pd1s2, Pd2s2, Ps2s2, sig4, sig2  # new,for consistency
 
         if (self.extrap):
             _, Ps = self.EK.PK_original(Ps)
@@ -362,6 +397,24 @@ class FASTPT:
 
         return P_1loop, Ps
 
+    def nl_bias_ta(self, P, P_window=None, C_window=None):
+        nu = -2
+
+        nl_bias_one_loop_coef1 = np.array(
+            [2 * 17 / 21., 2 * 1 / 2., 2 * 1 / 2., 2 * 4 / 21.])
+
+        Ps, mat = self.J_k_scalar(P, self.X_spt1, nu, P_window=P_window, C_window=C_window)
+
+        nl_bias_mat1 = np.multiply(nl_bias_one_loop_coef1, np.transpose(mat))
+        
+        A00E = np.sum(nl_bias_mat1, 1)
+
+        if (self.extrap):
+            _, Ps = self.EK.PK_original(Ps)
+            _, A00E = self.EK.PK_original(A00E)
+
+        return A00E, Ps
+    
     def one_loop_dd_bias(self, P, P_window=None, C_window=None):
         nu = -2
 
@@ -547,6 +600,32 @@ class FASTPT:
             _, P_B = self.EK.PK_original(P_B)
         return 2. * P_E, 2. * P_B
 
+    def IA_nl_bias(self, P, P_window=None, C_window=None):
+
+        P_nlb1, A = self.J_k_tensor(P, self.X_nlb_1, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_nlb1 = self.EK.PK_original(P_nlb1)
+
+        P_nlb2 = B_s2E(self.k_original, P)
+
+        P_nlb3, A = self.J_k_tensor(P, self.X_nlb_3, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_nlb3 = self.EK.PK_original(P_nlb3)
+
+        P_nlb4, A = self.J_k_tensor(P, self.X_nlb_4, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_nlb4 = self.EK.PK_original(P_nlb4)
+
+        P_nlb5, A = self.J_k_tensor(P, self.X_nlb_5, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_nlb5 = self.EK.PK_original(P_nlb5)
+
+        P_nlb6, A = self.J_k_tensor(P, self.X_nlb_6, P_window=P_window, C_window=C_window)
+        if (self.extrap):
+            _, P_nlb6 = self.EK.PK_original(P_nlb6)    
+
+        return 2. * P_nlb1, 4 * P_nlb2, 2. * P_nlb3, 2. * P_nlb4, 2. * P_nlb5, 2. * P_nlb6
+    
     ## eq 21 EE; eq 21 BB
 
     def IA_mix(self, P, P_window=None, C_window=None):
