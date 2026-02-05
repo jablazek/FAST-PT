@@ -1,35 +1,35 @@
 '''
-	FASTPT is a numerical algorithm to calculate
-	1-loop contributions to the matter power spectrum
-	and other integrals of a similar type.
-	The method is presented in papers arXiv:1603.04826 and arXiv:1609.05978
-	Please cite these papers if you are using FASTPT in your research.
+    FASTPT is a numerical algorithm to calculate
+    1-loop contributions to the matter power spectrum
+    and other integrals of a similar type.
+    The method is presented in papers arXiv:1603.04826 and arXiv:1609.05978
+    Please cite these papers if you are using FASTPT in your research.
 
-	Joseph E. McEwen (c) 2016
-	mcewen.24@osu.edu
+    Joseph E. McEwen (c) 2016
+    mcewen.24@osu.edu
 
-	Xiao Fang
-	fang.307@osu.edu
+    Xiao Fang
+    fang.307@osu.edu
 
-	Jonathan A. Blazek
-	blazek.35@osu.edu
-
-
-	FFFFFFFF    A           SSSSSSSSS   TTTTTTTTTTTTTT             PPPPPPPPP    TTTTTTTTTTTT
-	FF     	   A A         SS                 TT                   PP      PP        TT
-	FF        A   A        SS                 TT                   PP      PP        TT
-	FFFFF    AAAAAAA        SSSSSSSS          TT       ==========  PPPPPPPPP         TT
-	FF      AA     AA              SS         TT                   PP                TT
-	FF     AA       AA             SS         TT                   PP                TT
-	FF    AA         AA    SSSSSSSSS          TT                   PP                TT
+    Jonathan A. Blazek
+    blazek.35@osu.edu
 
 
-	The FASTPT class is the workhorse of the FASTPT algorithm.
-	This class calculates integrals of the form:
+    FFFFFFFF    A           SSSSSSSSS   TTTTTTTTTTTTTT             PPPPPPPPP    TTTTTTTTTTTT
+    FF         A A         SS                 TT                   PP      PP        TT
+    FF        A   A        SS                 TT                   PP      PP        TT
+    FFFFF    AAAAAAA        SSSSSSSS          TT       ==========  PPPPPPPPP         TT
+    FF      AA     AA              SS         TT                   PP                TT
+    FF     AA       AA             SS         TT                   PP                TT
+    FF    AA         AA    SSSSSSSSS          TT                   PP                TT
 
-	\int \frac{d^3q}{(2 \pi)^3} K(q,k-q) P(q) P(|k-q|)
 
-	\int \frac{d^3q_1}{(2 \pi)^3} K(\hat{q_1} \dot \hat{q_2},\hat{q_1} \dot \hat{k}, \hat{q_2} \dot \hat{k}, q_1, q_2) P(q_1) P(|k-q_1|)
+    The FASTPT class is the workhorse of the FASTPT algorithm.
+    This class calculates integrals of the form:
+
+    \int \frac{d^3q}{(2 \pi)^3} K(q,k-q) P(q) P(|k-q|)
+
+    \int \frac{d^3q_1}{(2 \pi)^3} K(\hat{q_1} \dot \hat{q_2},\hat{q_1} \dot \hat{k}, \hat{q_2} \dot \hat{k}, q_1, q_2) P(q_1) P(|k-q_1|)
 
 '''
 from __future__ import division
@@ -42,6 +42,7 @@ from numpy import exp, log, cos, sin, pi
 from ..utils.fastpt_extr import p_window, c_window
 from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL
 from ..utils.initialize_params import scalar_stuff, tensor_stuff
+from ..IA.IA_EFT import IA_EFT_mat, IA_EFT_coef
 from ..IA.IA_tt import IA_tt
 from ..IA.IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
 from ..IA.IA_ta import IA_deltaE1, P_IA_deltaE2, IA_0E0E, IA_0B0B
@@ -130,7 +131,7 @@ class FASTPT:
     """
 
     def __init__(self, k, nu=None, to_do=None, param_mat=None, low_extrap=None, high_extrap=None, n_pad=None,
-                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=True):
+                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=True, EFT_do=False):
         
         if (k is None or len(k) == 0):
             raise ValueError('You must provide an input k array.')
@@ -167,6 +168,7 @@ class FASTPT:
         self.low_extrap = low_extrap
         self.high_extrap = high_extrap
         self.__k_extrap = k #K extrapolation not padded
+        self.EFT_do = EFT_do
 
         
         # check for log spacing
@@ -268,7 +270,20 @@ class FASTPT:
                 else:
                     raise ValueError(f'FAST-PT does not recognize {entry} in the to_do list.\n{self.todo_dict.keys()} are the valid entries.')
 
-        
+        if self.EFT_do:
+            nu = -2
+            self.EFT_matrices = IA_EFT_mat()
+            self.Jabl_I11 = scalar_stuff(self.EFT_matrices[0], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I12 = scalar_stuff(self.EFT_matrices[1], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I13 = scalar_stuff(self.EFT_matrices[2], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I22 = scalar_stuff(self.EFT_matrices[3], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I23 = scalar_stuff(self.EFT_matrices[4], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I24 = scalar_stuff(self.EFT_matrices[5], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I33 = scalar_stuff(self.EFT_matrices[6], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I34 = scalar_stuff(self.EFT_matrices[7], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I44 = scalar_stuff(self.EFT_matrices[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl_I55 = scalar_stuff(self.EFT_matrices[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+
         ### INITIALIZATION of k-grid quantities ###
         if self.todo_dict['one_loop_dd'] or self.todo_dict['dd_bias'] or self.todo_dict['IRres']:
             self.X_spt
@@ -809,6 +824,141 @@ class FASTPT:
         self.cache.set(Pd2s2, "Ps2s2", hash_key, P_hash)
         return Pd2s2
 
+
+    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=False):
+        # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
+        # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
+
+        # Coefficients for the (22)-type integrals:
+        IA_coef = IA_EFT_coef()
+
+        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
+            # Function to compute the final (22)-integrals:
+            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+            P_mat = np.multiply(coef, np.transpose(mat))
+            Inm = np.sum(P_mat, 1)
+            return Inm, Ps
+        def J2_integral(k, P):
+            # calculates the J_2 integral in the EFT of IA
+            # via a discrete convolution integral
+
+            N = k.size
+            n = np.arange(-N+1, N)
+            dL = log(k[1])-log(k[0])
+            s = n*dL
+
+            cut = 4
+            high_s = s[s > cut]
+            low_s = s[s < -cut]
+            mid_high_s = s[(s <= cut) & (s > 0)]
+            mid_low_s = s[(s >= -cut) & (s < 0)]
+
+            Z = lambda r: (15/r-55*r-55*r**3+15*r**5 +
+                           (60-15/r**2-90*r**2+60*r**4-15*r**6)*log((r+1)/np.absolute(r-1))/2)
+            Z_low = lambda r: -128*r+384/7/r-128/21/r**3-128/231/r**5-128/1001/r**7
+            Z_high = lambda r: -128*r**3+384/7*r**5-128/21*r**7
+
+            f_mid_low = Z(exp(-mid_low_s))
+            f_mid_high = Z(exp(-mid_high_s))
+            f_high = Z_high(exp(-high_s))
+            f_low = Z_low(exp(-low_s))
+
+            f = np.hstack((f_low, f_mid_low, -80, f_mid_high, f_high))
+
+            g = fftconvolve(P, f) * dL
+            g_k = g[N-1:2*N-1]
+            P_bar = 1/42*k**3/(2*pi)**2*P*g_k
+
+            return P_bar
+        def J3_integral(k, P):
+            # calculates the J_3 integral in the EFT of IA
+            # via a discrete convolution integral
+
+            N = k.size
+            n = np.arange(-N+1, N)
+            dL = log(k[1])-log(k[0])
+            s = n*dL
+
+            cut = 4
+            high_s = s[s > cut]
+            low_s = s[s < -cut]
+            mid_high_s = s[(s <= cut) & (s > 0)]
+            mid_low_s = s[(s >= -cut) & (s < 0)]
+
+            Z = lambda r: (15/r-10*r+164*r**3-150*r**5+45*r**7+
+                           (15-15/r**2+90*r**2-210*r**4+165*r**6-
+                            45*r**8)*log((r+1)/np.absolute(r-1))/2)
+            Z_low = lambda r: 256/7*r+256/7/r-256/33/r**3-256/273/r**5-256/1001/r**7
+            Z_high = lambda r: 256*r**3-2304/7*r**5+3328/21*r**7
+
+            f_mid_low = Z(exp(-mid_low_s))
+            f_mid_high = Z(exp(-mid_high_s))
+            f_high = Z_high(exp(-high_s))
+            f_low = Z_low(exp(-low_s))
+
+            f = np.hstack((f_low, f_mid_low, 64, f_mid_high, f_high))
+
+            g = fftconvolve(P, f) * dL
+            g_k = g[N-1:2*N-1]
+            P_bar = 1/168*k**3/(2*pi)**2*P*g_k
+
+            return P_bar
+
+        # Compute the (22)-integrals
+        I11, Ps = get_Inm(P, IA_coef[0], self.Jabl_I11, -2, C_window)
+        I12, _ = get_Inm(P, IA_coef[1], self.Jabl_I12, -2, C_window)
+        I13, _ = get_Inm(P, IA_coef[2], self.Jabl_I13, -2, C_window)
+        I22, _ = get_Inm(P, IA_coef[3], self.Jabl_I22, -2, C_window)
+        I23, _ = get_Inm(P, IA_coef[4], self.Jabl_I23, -2, C_window)
+        I24, _ = get_Inm(P, IA_coef[5], self.Jabl_I24, -2, C_window)
+        I33, _ = get_Inm(P, IA_coef[6], self.Jabl_I33, -2, C_window)
+        I34, _ = get_Inm(P, IA_coef[7], self.Jabl_I34, -2, C_window)
+        I44, _ = get_Inm(P, IA_coef[8], self.Jabl_I44, -1.6, C_window)
+        I55, _ = get_Inm(P, IA_coef[9], self.Jabl_I55, -1.6, C_window)
+
+        I24 /= self.__k_final**2
+        I34 /= self.__k_final**2
+        I44 /= self.__k_final**4
+        I55 /= self.__k_final**4
+
+        # subtract the low-k limit of the integral:
+        if remove_lowk:
+            I22 -= I22[0]
+            I23 -= I23[0]
+            I24 -= I24[0]
+            I33 -= I33[0]
+            I44 -= I44[0]
+            I55 -= I55[0]
+        
+
+
+        # Compute the (13)-integrals:
+        J1 = P_13_reg(self.__k_final, Ps)/2
+        J2 = J2_integral(self.__k_final, Ps)
+        J3 = J3_integral(self.__k_final, Ps)
+
+        _, I11 = self.EK.PK_original(I11)
+        _, I12 = self.EK.PK_original(I12)
+        _, I13 = self.EK.PK_original(I13)
+        _, I22 = self.EK.PK_original(I22)
+        _, I23 = self.EK.PK_original(I23)
+        _, I24 = self.EK.PK_original(I24)
+        _, I33 = self.EK.PK_original(I33)
+        _, I34 = self.EK.PK_original(I34)
+        _, I44 = self.EK.PK_original(I44)
+        _, I55 = self.EK.PK_original(I55)
+        _, J1 = self.EK.PK_original(J1)
+        _, J2 = self.EK.PK_original(J2)
+        _, J3 = self.EK.PK_original(J3)
+
+        I14 = ((28*I12-I22+I23)/2/np.sqrt(6)-5*I24+5*I34)/7
+        I66 = I22/9-np.sqrt(6)/9*I24+I44/6
+        I67 = I22/36+I23/12-5*np.sqrt(6)/72*I24-np.sqrt(6)/24*I34+I44/6
+        I77 = I22/144+I23/24+I33/16-np.sqrt(6)*I24/36-np.sqrt(6)*I34/12+I44/6
+
+        return I11, I12, I13, I14, I22, I23, I24, I33, I34, I44, I55, I66, I67, I77, J1, J2, J3
+
+
     
     def one_loop_dd_bias_b3nl(self, P, P_window=None, C_window=None):
         """
@@ -1175,7 +1325,7 @@ class FASTPT:
             (P_d2E, P_d20E, P_s2E, P_s20E) where:
         P_d2E : 2nd-order density-E-mode correlation
         P_d20E : 2nd-order density-density-E-mode correlation
-	P_s2E : 2nd-order tidal-E-mode correlation
+    P_s2E : 2nd-order tidal-E-mode correlation
         P_s20E : 2nd-order tidal-density-E-mode correlation
         """
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
@@ -1198,7 +1348,7 @@ class FASTPT:
         tuple
             (P_s2E2, P_d2E2) where:
         P_s2E2 : 2nd-order tidal-E-mode squared correlation
-	P_d2E2 : 2nd-order density-E-mode squared correlation
+    P_d2E2 : 2nd-order density-E-mode squared correlation
         """
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
         P_s2E2 = self.compute_term("P_s2E2", self.X_IA_gb2_S2he, operation=lambda x: 2 * x,
@@ -1398,7 +1548,7 @@ class FASTPT:
 
         # speed up by using trap rule integration?
         # change to integration over log-k(?):
-        # 		Sigma = integrate.quad(lambda x: x*(4*pi)*psmooth(x)*(1-3*(2*rbao*x*cos(x*rbao)+(-2+rbao**2*x**2)*sin(rbao*x))/(x*rbao)**3)/(3*(2*pi)**3), np.log(kmin), np.log(L))[0]
+        #       Sigma = integrate.quad(lambda x: x*(4*pi)*psmooth(x)*(1-3*(2*rbao*x*cos(x*rbao)+(-2+rbao**2*x**2)*sin(rbao*x))/(x*rbao)**3)/(3*(2*pi)**3), np.log(kmin), np.log(L))[0]
         def presum(x):
             return psmooth(x) + pw(x) * exp(-x ** 2 * Sigma)
 

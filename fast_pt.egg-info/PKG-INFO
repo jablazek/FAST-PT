@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: fast-pt
-Version: 4.0.0b1
+Version: 4.0.0
 Summary: FAST-PT is a code to calculate quantities in cosmological perturbation theory at 1-loop (including, e.g., corrections to the matter power spectrum).
 Author: Joseph E. McEwen, Xiao Fang, Jonathan Blazek, Vincent Schacknies
 Author-email: blazek@berkeley.edu, vincent.schacknies@icloud.com
@@ -33,7 +33,7 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3
 Classifier: Topic :: Scientific/Engineering :: Astronomy
 Classifier: Topic :: Scientific/Engineering :: Physics
-Requires-Python: >=3.5
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: numpy>=1.17
