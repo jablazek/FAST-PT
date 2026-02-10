@@ -283,16 +283,7 @@ class FASTPT:
             self.Jabl_I34 = scalar_stuff(self.EFT_matrices[7], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.Jabl_I44 = scalar_stuff(self.EFT_matrices[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.Jabl_I55 = scalar_stuff(self.EFT_matrices[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl = np.array([self.Jabl_I11,
-                                  self.Jabl_I12,
-                                  self.Jabl_I13,
-                                  self.Jabl_I22,
-                                  self.Jabl_I23,
-                                  self.Jabl_I24,
-                                  self.Jabl_I33,
-                                  self.Jabl_I34,
-                                  self.Jabl_I44,
-                                  self.Jabl_I55])
+            
 
         ### INITIALIZATION of k-grid quantities ###
         if self.todo_dict['one_loop_dd'] or self.todo_dict['dd_bias'] or self.todo_dict['IRres']:
@@ -833,17 +824,18 @@ class FASTPT:
         Pd2s2 = self._apply_extrapolation(Pd2s2)
         self.cache.set(Pd2s2, "Ps2s2", hash_key, P_hash)
         return Pd2s2
-    def get_Inm(self, P, index, nu, P_window=P_window, C_window=C_window):
+    def get_Inm(self, P, Jabl, index, nu, P_window=None, C_window=None):
         # Function to compute the final (22)-integrals:
         indices = ["11","12","13","22","23","24","33","34","44","55"]
 
         IA_coef = IA_EFT_coef()
         coef = IA_coef[index]
-        Jabl = self.Jabl[index]
         hash_key, P_hash = self._create_hash_key("I"+indices[index], Jabl, P, P_window, C_window)
         Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
         P_mat = np.multiply(coef, np.transpose(mat))
         Inm = np.sum(P_mat, 1)
+        if index in [5,7,8,9]:
+            Inm /= self.__k_final**2
         return Inm, Ps
 
     def J2_integral(self, k, P):
@@ -912,33 +904,27 @@ class FASTPT:
         return P_bar
 
 
-    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=False):
+    def eft_integrals_Inm(self, P, P_window=None, C_window=None, remove_lowk=False):
         # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
         # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
 
         # Coefficients for the (22)-type integrals:
-        #need hash keys, check if cache is done
-        #make helper functions
+
         #subtract sig4
         
         
 
         # Compute the (22)-integrals
-        I11, Ps = self.get_Inm(P, 0, -2, C_window)
-        I12, _ = self.get_Inm(P, 1, -2, C_window)
-        I13, _ = self.get_Inm(P, 2, -2, C_window)
-        I22, _ = self.get_Inm(P, 3, -2, C_window)
-        I23, _ = self.get_Inm(P, 4, -2, C_window)
-        I24, _ = self.get_Inm(P, 5, -2, C_window)
-        I33, _ = self.get_Inm(P, 6, -2, C_window)
-        I34, _ = self.get_Inm(P, 7, -2, C_window)
-        I44, _ = self.get_Inm(P, 8, -1.6, C_window)
-        I55, _ = self.get_Inm(P, 9, -1.6, C_window)
-
-        I24 /= self.__k_final**2
-        I34 /= self.__k_final**2
-        I44 /= self.__k_final**4
-        I55 /= self.__k_final**4
+        I11, self.Ps = self.get_Inm(P, self.Jabl_I11, 0, -2, C_window)
+        I12, _ = self.get_Inm(P, self.Jabl_I12, 1, -2, C_window)
+        I13, _ = self.get_Inm(P, self.Jabl_I13, 2, -2, C_window)
+        I22, _ = self.get_Inm(P, self.Jabl_I22, 3, -2, C_window)
+        I23, _ = self.get_Inm(P, self.Jabl_I23, 4, -2, C_window)
+        I24, _ = self.get_Inm(P, self.Jabl_I24, 5, -2, C_window)
+        I33, _ = self.get_Inm(P, self.Jabl_I33, 6, -2, C_window)
+        I34, _ = self.get_Inm(P, self.Jabl_I34, 7, -2, C_window)
+        I44, _ = self.get_Inm(P, self.Jabl_I44, 8, -1.6, C_window)
+        I55, _ = self.get_Inm(P, self.Jabl_I55, 9, -1.6, C_window)
 
         # subtract the low-k limit of the integral:
         if remove_lowk:
@@ -948,13 +934,6 @@ class FASTPT:
             I33 -= I33[0]
             I44 -= I44[0]
             I55 -= I55[0]
-        
-
-
-        # Compute the (13)-integrals:
-        J1 = P_13_reg(self.__k_final, Ps)/2
-        J2 = self.J2_integral(self.__k_final, Ps)
-        J3 = self.J3_integral(self.__k_final, Ps)
 
         _, I11 = self.EK.PK_original(I11)
         _, I12 = self.EK.PK_original(I12)
@@ -966,16 +945,27 @@ class FASTPT:
         _, I34 = self.EK.PK_original(I34)
         _, I44 = self.EK.PK_original(I44)
         _, I55 = self.EK.PK_original(I55)
-        _, J1 = self.EK.PK_original(J1)
-        _, J2 = self.EK.PK_original(J2)
-        _, J3 = self.EK.PK_original(J3)
+        
 
         I14 = ((28*I12-I22+I23)/2/np.sqrt(6)-5*I24+5*I34)/7
         I66 = I22/9-np.sqrt(6)/9*I24+I44/6
         I67 = I22/36+I23/12-5*np.sqrt(6)/72*I24-np.sqrt(6)/24*I34+I44/6
         I77 = I22/144+I23/24+I33/16-np.sqrt(6)*I24/36-np.sqrt(6)*I34/12+I44/6
 
-        return I11, I12, I13, I14, I22, I23, I24, I33, I34, I44, I55, I66, I67, I77, J1, J2, J3
+        return I11, I12, I13, I14, I22, I23, I24, I33, I34, I44, I55, I66, I67, I77
+
+    def eft_integrals_Jk(self, P, P_window=None, C_window=None, remove_lowk=False):
+        # Compute the (13)-integrals:
+
+        J1 = P_13_reg(self.__k_final, self.Ps)/2
+        J2 = self.J2_integral(self.__k_final, self.Ps)
+        J3 = self.J3_integral(self.__k_final, self.Ps)
+        _, J1 = self.EK.PK_original(J1)
+        _, J2 = self.EK.PK_original(J2)
+        _, J3 = self.EK.PK_original(J3)
+
+        return J1, J2, J3
+
 
 
     
