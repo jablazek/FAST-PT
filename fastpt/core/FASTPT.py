@@ -283,6 +283,16 @@ class FASTPT:
             self.Jabl_I34 = scalar_stuff(self.EFT_matrices[7], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.Jabl_I44 = scalar_stuff(self.EFT_matrices[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
             self.Jabl_I55 = scalar_stuff(self.EFT_matrices[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+            self.Jabl = np.array([self.Jabl_I11,
+                                  self.Jabl_I12,
+                                  self.Jabl_I13,
+                                  self.Jabl_I22,
+                                  self.Jabl_I23,
+                                  self.Jabl_I24,
+                                  self.Jabl_I33,
+                                  self.Jabl_I34,
+                                  self.Jabl_I44,
+                                  self.Jabl_I55])
 
         ### INITIALIZATION of k-grid quantities ###
         if self.todo_dict['one_loop_dd'] or self.todo_dict['dd_bias'] or self.todo_dict['IRres']:
@@ -823,6 +833,83 @@ class FASTPT:
         Pd2s2 = self._apply_extrapolation(Pd2s2)
         self.cache.set(Pd2s2, "Ps2s2", hash_key, P_hash)
         return Pd2s2
+    def get_Inm(self, P, index, nu, P_window=P_window, C_window=C_window):
+        # Function to compute the final (22)-integrals:
+        indices = ["11","12","13","22","23","24","33","34","44","55"]
+
+        IA_coef = IA_EFT_coef()
+        coef = IA_coef[index]
+        Jabl = self.Jabl[index]
+        hash_key, P_hash = self._create_hash_key("I"+indices[index], Jabl, P, P_window, C_window)
+        Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+        P_mat = np.multiply(coef, np.transpose(mat))
+        Inm = np.sum(P_mat, 1)
+        return Inm, Ps
+
+    def J2_integral(self, k, P):
+        # calculates the J_2 integral in the EFT of IA
+        # via a discrete convolution integral
+        hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
+        N = k.size
+        n = np.arange(-N+1, N)
+        dL = log(k[1])-log(k[0])
+        s = n*dL
+        
+        cut = 4
+        high_s = s[s > cut]
+        low_s = s[s < -cut]
+        mid_high_s = s[(s <= cut) & (s > 0)]
+        mid_low_s = s[(s >= -cut) & (s < 0)]
+
+        Z = lambda r: (15/r-55*r-55*r**3+15*r**5 +
+                       (60-15/r**2-90*r**2+60*r**4-15*r**6)*log((r+1)/np.absolute(r-1))/2)
+        Z_low = lambda r: -128*r+384/7/r-128/21/r**3-128/231/r**5-128/1001/r**7
+        Z_high = lambda r: -128*r**3+384/7*r**5-128/21*r**7
+
+        f_mid_low = Z(exp(-mid_low_s))
+        f_mid_high = Z(exp(-mid_high_s))
+        f_high = Z_high(exp(-high_s))
+        f_low = Z_low(exp(-low_s))
+
+        f = np.hstack((f_low, f_mid_low, -80, f_mid_high, f_high))
+
+        g = fftconvolve(P, f) * dL
+        g_k = g[N-1:2*N-1]
+        P_bar = 1/42*k**3/(2*pi)**2*P*g_k
+
+        return P_bar
+    def J3_integral(self, k, P):
+        # calculates the J_3 integral in the EFT of IA
+        # via a discrete convolution integral
+        hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
+        N = k.size
+        n = np.arange(-N+1, N)
+        dL = log(k[1])-log(k[0])
+        s = n*dL
+
+        cut = 4
+        high_s = s[s > cut]
+        low_s = s[s < -cut]
+        mid_high_s = s[(s <= cut) & (s > 0)]
+        mid_low_s = s[(s >= -cut) & (s < 0)]
+
+        Z = lambda r: (15/r-10*r+164*r**3-150*r**5+45*r**7+
+                       (15-15/r**2+90*r**2-210*r**4+165*r**6-
+                        45*r**8)*log((r+1)/np.absolute(r-1))/2)
+        Z_low = lambda r: 256/7*r+256/7/r-256/33/r**3-256/273/r**5-256/1001/r**7
+        Z_high = lambda r: 256*r**3-2304/7*r**5+3328/21*r**7
+
+        f_mid_low = Z(exp(-mid_low_s))
+        f_mid_high = Z(exp(-mid_high_s))
+        f_high = Z_high(exp(-high_s))
+        f_low = Z_low(exp(-low_s))
+
+        f = np.hstack((f_low, f_mid_low, 64, f_mid_high, f_high))
+        g = fftconvolve(P, f) * dL
+        g_k = g[N-1:2*N-1]
+        P_bar = 1/168*k**3/(2*pi)**2*P*g_k
+
+        return P_bar
 
 
     def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=False):
@@ -830,91 +917,23 @@ class FASTPT:
         # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
 
         # Coefficients for the (22)-type integrals:
-        IA_coef = IA_EFT_coef()
-
-        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
-            # Function to compute the final (22)-integrals:
-            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
-        def J2_integral(k, P):
-            # calculates the J_2 integral in the EFT of IA
-            # via a discrete convolution integral
-
-            N = k.size
-            n = np.arange(-N+1, N)
-            dL = log(k[1])-log(k[0])
-            s = n*dL
-
-            cut = 4
-            high_s = s[s > cut]
-            low_s = s[s < -cut]
-            mid_high_s = s[(s <= cut) & (s > 0)]
-            mid_low_s = s[(s >= -cut) & (s < 0)]
-
-            Z = lambda r: (15/r-55*r-55*r**3+15*r**5 +
-                           (60-15/r**2-90*r**2+60*r**4-15*r**6)*log((r+1)/np.absolute(r-1))/2)
-            Z_low = lambda r: -128*r+384/7/r-128/21/r**3-128/231/r**5-128/1001/r**7
-            Z_high = lambda r: -128*r**3+384/7*r**5-128/21*r**7
-
-            f_mid_low = Z(exp(-mid_low_s))
-            f_mid_high = Z(exp(-mid_high_s))
-            f_high = Z_high(exp(-high_s))
-            f_low = Z_low(exp(-low_s))
-
-            f = np.hstack((f_low, f_mid_low, -80, f_mid_high, f_high))
-
-            g = fftconvolve(P, f) * dL
-            g_k = g[N-1:2*N-1]
-            P_bar = 1/42*k**3/(2*pi)**2*P*g_k
-
-            return P_bar
-        def J3_integral(k, P):
-            # calculates the J_3 integral in the EFT of IA
-            # via a discrete convolution integral
-
-            N = k.size
-            n = np.arange(-N+1, N)
-            dL = log(k[1])-log(k[0])
-            s = n*dL
-
-            cut = 4
-            high_s = s[s > cut]
-            low_s = s[s < -cut]
-            mid_high_s = s[(s <= cut) & (s > 0)]
-            mid_low_s = s[(s >= -cut) & (s < 0)]
-
-            Z = lambda r: (15/r-10*r+164*r**3-150*r**5+45*r**7+
-                           (15-15/r**2+90*r**2-210*r**4+165*r**6-
-                            45*r**8)*log((r+1)/np.absolute(r-1))/2)
-            Z_low = lambda r: 256/7*r+256/7/r-256/33/r**3-256/273/r**5-256/1001/r**7
-            Z_high = lambda r: 256*r**3-2304/7*r**5+3328/21*r**7
-
-            f_mid_low = Z(exp(-mid_low_s))
-            f_mid_high = Z(exp(-mid_high_s))
-            f_high = Z_high(exp(-high_s))
-            f_low = Z_low(exp(-low_s))
-
-            f = np.hstack((f_low, f_mid_low, 64, f_mid_high, f_high))
-
-            g = fftconvolve(P, f) * dL
-            g_k = g[N-1:2*N-1]
-            P_bar = 1/168*k**3/(2*pi)**2*P*g_k
-
-            return P_bar
+        #need hash keys, check if cache is done
+        #make helper functions
+        #subtract sig4
+        
+        
 
         # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.Jabl_I11, -2, C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.Jabl_I12, -2, C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.Jabl_I13, -2, C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.Jabl_I22, -2, C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.Jabl_I23, -2, C_window)
-        I24, _ = get_Inm(P, IA_coef[5], self.Jabl_I24, -2, C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.Jabl_I33, -2, C_window)
-        I34, _ = get_Inm(P, IA_coef[7], self.Jabl_I34, -2, C_window)
-        I44, _ = get_Inm(P, IA_coef[8], self.Jabl_I44, -1.6, C_window)
-        I55, _ = get_Inm(P, IA_coef[9], self.Jabl_I55, -1.6, C_window)
+        I11, Ps = self.get_Inm(P, 0, -2, C_window)
+        I12, _ = self.get_Inm(P, 1, -2, C_window)
+        I13, _ = self.get_Inm(P, 2, -2, C_window)
+        I22, _ = self.get_Inm(P, 3, -2, C_window)
+        I23, _ = self.get_Inm(P, 4, -2, C_window)
+        I24, _ = self.get_Inm(P, 5, -2, C_window)
+        I33, _ = self.get_Inm(P, 6, -2, C_window)
+        I34, _ = self.get_Inm(P, 7, -2, C_window)
+        I44, _ = self.get_Inm(P, 8, -1.6, C_window)
+        I55, _ = self.get_Inm(P, 9, -1.6, C_window)
 
         I24 /= self.__k_final**2
         I34 /= self.__k_final**2
@@ -934,8 +953,8 @@ class FASTPT:
 
         # Compute the (13)-integrals:
         J1 = P_13_reg(self.__k_final, Ps)/2
-        J2 = J2_integral(self.__k_final, Ps)
-        J3 = J3_integral(self.__k_final, Ps)
+        J2 = self.J2_integral(self.__k_final, Ps)
+        J3 = self.J3_integral(self.__k_final, Ps)
 
         _, I11 = self.EK.PK_original(I11)
         _, I12 = self.EK.PK_original(I12)
