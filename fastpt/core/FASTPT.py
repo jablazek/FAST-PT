@@ -830,10 +830,11 @@ class FASTPT:
 
         IA_coef = IA_EFT_coef()
         coef = IA_coef[index]
+        Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
         hash_key, P_hash = self._create_hash_key("I"+indices[index], Jabl, P, P_window, C_window)
         result = self.cache.get("I"+indices[index], hash_key)
-        if result is not None: return result
-        Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+        if result is not None: return result, Ps
+        
         P_mat = np.multiply(coef, np.transpose(mat))
         Inm = np.sum(P_mat, 1)
         if index in [5,7,8,9]:
@@ -844,9 +845,9 @@ class FASTPT:
     def J2_integral(self, k, P):
         # calculates the J_2 integral in the EFT of IA
         # via a discrete convolution integral
-        hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
-        result = self.cache.get("J2", hash_key)
-        if result is not None: return result
+        #hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
+        #result = self.cache.get("J2", hash_key)
+        #if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
@@ -873,14 +874,15 @@ class FASTPT:
         g = fftconvolve(P, f) * dL
         g_k = g[N-1:2*N-1]
         P_bar = 1/42*k**3/(2*pi)**2*P*g_k
-        self.cache.set(P_bar, "J2", hash_key, P_hash)
-        return P_bar
+        _, J2 = self.EK.PK_original(P_bar)
+        #self.cache.set(J2, "J2", hash_key, P_hash)
+        return J2
     def J3_integral(self, k, P):
         # calculates the J_3 integral in the EFT of IA
         # via a discrete convolution integral
-        hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
-        result = self.cache.get("J3", hash_key)
-        if result is not None: return result
+        #hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
+        #result = self.cache.get("J3", hash_key)
+        #if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
@@ -907,9 +909,9 @@ class FASTPT:
         g = fftconvolve(P, f) * dL
         g_k = g[N-1:2*N-1]
         P_bar = 1/168*k**3/(2*pi)**2*P*g_k
-        self.cache.set(P_bar, "J3", hash_key, P_hash)
-
-        return P_bar
+        _, J3 = self.EK.PK_original(P_bar)
+        #self.cache.set(J3, "J3", hash_key, P_hash)
+        return J3
 
 
     def eft_integrals_Inm(self, P, P_window=None, C_window=None, remove_lowk=False):
@@ -969,8 +971,7 @@ class FASTPT:
         J2 = self.J2_integral(self.__k_final, self.Ps)
         J3 = self.J3_integral(self.__k_final, self.Ps)
         _, J1 = self.EK.PK_original(J1)
-        _, J2 = self.EK.PK_original(J2)
-        _, J3 = self.EK.PK_original(J3)
+
 
         return J1, J2, J3
 
