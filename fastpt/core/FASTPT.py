@@ -838,6 +838,7 @@ class FASTPT:
         Inm = np.sum(P_mat, 1)
         if index in [5,7,8,9]:
             Inm /= self.__k_final**2
+        self.cache.set(Inm, "I"+indices[index], hash_key, P_hash)
         return Inm, Ps
 
     def J2_integral(self, k, P):
@@ -872,7 +873,7 @@ class FASTPT:
         g = fftconvolve(P, f) * dL
         g_k = g[N-1:2*N-1]
         P_bar = 1/42*k**3/(2*pi)**2*P*g_k
-
+        self.cache.set(P_bar, "J2", hash_key, P_hash)
         return P_bar
     def J3_integral(self, k, P):
         # calculates the J_3 integral in the EFT of IA
@@ -906,6 +907,7 @@ class FASTPT:
         g = fftconvolve(P, f) * dL
         g_k = g[N-1:2*N-1]
         P_bar = 1/168*k**3/(2*pi)**2*P*g_k
+        self.cache.set(P_bar, "J3", hash_key, P_hash)
 
         return P_bar
 
