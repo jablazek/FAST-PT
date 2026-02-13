@@ -831,6 +831,8 @@ class FASTPT:
         IA_coef = IA_EFT_coef()
         coef = IA_coef[index]
         hash_key, P_hash = self._create_hash_key("I"+indices[index], Jabl, P, P_window, C_window)
+        result = self.cache.get("I"+indices[index], hash_key)
+        if result is not None: return result
         Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
         P_mat = np.multiply(coef, np.transpose(mat))
         Inm = np.sum(P_mat, 1)
@@ -842,6 +844,8 @@ class FASTPT:
         # calculates the J_2 integral in the EFT of IA
         # via a discrete convolution integral
         hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
+        result = self.cache.get("J2", hash_key)
+        if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
@@ -874,6 +878,8 @@ class FASTPT:
         # calculates the J_3 integral in the EFT of IA
         # via a discrete convolution integral
         hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
+        result = self.cache.get("J3", hash_key)
+        if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
