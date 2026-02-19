@@ -131,7 +131,7 @@ class FASTPT:
     """
 
     def __init__(self, k, nu=None, to_do=None, param_mat=None, low_extrap=None, high_extrap=None, n_pad=None,
-                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=True, EFT_do=False):
+                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=False, EFT_do=False):
         
         if (k is None or len(k) == 0):
             raise ValueError('You must provide an input k array.')
@@ -845,9 +845,9 @@ class FASTPT:
     def J2_integral(self, k, P):
         # calculates the J_2 integral in the EFT of IA
         # via a discrete convolution integral
-        #hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
-        #result = self.cache.get("J2", hash_key)
-        #if result is not None: return result
+        hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
+        result = self.cache.get("J2", hash_key)
+        if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
@@ -875,14 +875,14 @@ class FASTPT:
         g_k = g[N-1:2*N-1]
         P_bar = 1/42*k**3/(2*pi)**2*P*g_k
         _, J2 = self.EK.PK_original(P_bar)
-        #self.cache.set(J2, "J2", hash_key, P_hash)
+        self.cache.set(J2, "J2", hash_key, P_hash)
         return J2
     def J3_integral(self, k, P):
         # calculates the J_3 integral in the EFT of IA
         # via a discrete convolution integral
-        #hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
-        #result = self.cache.get("J3", hash_key)
-        #if result is not None: return result
+        hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
+        result = self.cache.get("J3", hash_key)
+        if result is not None: return result
         N = k.size
         n = np.arange(-N+1, N)
         dL = log(k[1])-log(k[0])
@@ -910,7 +910,7 @@ class FASTPT:
         g_k = g[N-1:2*N-1]
         P_bar = 1/168*k**3/(2*pi)**2*P*g_k
         _, J3 = self.EK.PK_original(P_bar)
-        #self.cache.set(J3, "J3", hash_key, P_hash)
+        self.cache.set(J3, "J3", hash_key, P_hash)
         return J3
 
 

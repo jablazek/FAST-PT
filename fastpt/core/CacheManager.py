@@ -5,7 +5,7 @@ import sys
 class CacheManager:
     """Unified cache manager for FASTPT with memory efficiency features"""
     
-    def __init__(self, max_size_mb=500, dump_cache=True):
+    def __init__(self, max_size_mb=500, dump_cache=False):
         """Initialize cache with optional maximum size in MB"""
         self.cache = {}
         self.hit_counts = {}  # Track hits per cache item
