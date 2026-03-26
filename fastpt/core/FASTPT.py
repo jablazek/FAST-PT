@@ -40,7 +40,7 @@ from ..info import __version__
 import numpy as np
 from numpy import exp, log, cos, sin, pi
 from ..utils.fastpt_extr import p_window, c_window
-from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL
+from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, J2_integral, J3_integral
 from ..utils.initialize_params import scalar_stuff, tensor_stuff
 from ..IA.IA_EFT import IA_EFT_mat, IA_EFT_coef
 from ..IA.IA_tt import IA_tt
@@ -131,7 +131,7 @@ class FASTPT:
     """
 
     def __init__(self, k, nu=None, to_do=None, param_mat=None, low_extrap=None, high_extrap=None, n_pad=None,
-                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=False, EFT_do=False):
+                verbose=False, simple=False, max_cache_size_mb=500, dump_cache=False):
         
         if (k is None or len(k) == 0):
             raise ValueError('You must provide an input k array.')
@@ -168,7 +168,7 @@ class FASTPT:
         self.low_extrap = low_extrap
         self.high_extrap = high_extrap
         self.__k_extrap = k #K extrapolation not padded
-        self.EFT_do = EFT_do
+        
 
         
         # check for log spacing
@@ -246,7 +246,8 @@ class FASTPT:
             'IA_mix': False, 'OV': False, 'kPol': False,
             'RSD': False, 'IRres': False, 
             'tij': False, 'gb2': False, 
-            'all': False, 'everything': False
+            'all': False, 'everything': False,
+            'EFT': False
         }
 
         if to_do: 
@@ -270,7 +271,7 @@ class FASTPT:
                 else:
                     raise ValueError(f'FAST-PT does not recognize {entry} in the to_do list.\n{self.todo_dict.keys()} are the valid entries.')
 
-        if self.EFT_do:
+        if self.todo_dict['EFT']:
             nu = -2
             self.EFT_matrices = IA_EFT_mat()
             self.Jabl_I11 = scalar_stuff(self.EFT_matrices[0], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
@@ -842,73 +843,25 @@ class FASTPT:
         self.cache.set(Inm, "I"+indices[index], hash_key, P_hash)
         return Inm, Ps
 
-    def J2_integral(self, k, P):
+    def get_J2(self, k, P):
         # calculates the J_2 integral in the EFT of IA
         # via a discrete convolution integral
         hash_key, P_hash = self._create_hash_key("J2", None, P, None, None)
         result = self.cache.get("J2", hash_key)
         if result is not None: return result
-        N = k.size
-        n = np.arange(-N+1, N)
-        dL = log(k[1])-log(k[0])
-        s = n*dL
         
-        cut = 4
-        high_s = s[s > cut]
-        low_s = s[s < -cut]
-        mid_high_s = s[(s <= cut) & (s > 0)]
-        mid_low_s = s[(s >= -cut) & (s < 0)]
-
-        Z = lambda r: (15/r-55*r-55*r**3+15*r**5 +
-                       (60-15/r**2-90*r**2+60*r**4-15*r**6)*log((r+1)/np.absolute(r-1))/2)
-        Z_low = lambda r: -128*r+384/7/r-128/21/r**3-128/231/r**5-128/1001/r**7
-        Z_high = lambda r: -128*r**3+384/7*r**5-128/21*r**7
-
-        f_mid_low = Z(exp(-mid_low_s))
-        f_mid_high = Z(exp(-mid_high_s))
-        f_high = Z_high(exp(-high_s))
-        f_low = Z_low(exp(-low_s))
-
-        f = np.hstack((f_low, f_mid_low, -80, f_mid_high, f_high))
-
-        g = fftconvolve(P, f) * dL
-        g_k = g[N-1:2*N-1]
-        P_bar = 1/42*k**3/(2*pi)**2*P*g_k
+        P_bar = J2_integral(k, P)
         _, J2 = self.EK.PK_original(P_bar)
         self.cache.set(J2, "J2", hash_key, P_hash)
         return J2
-    def J3_integral(self, k, P):
+    def get_J3(self, k, P):
         # calculates the J_3 integral in the EFT of IA
         # via a discrete convolution integral
         hash_key, P_hash = self._create_hash_key("J3", None, P, None, None)
         result = self.cache.get("J3", hash_key)
         if result is not None: return result
-        N = k.size
-        n = np.arange(-N+1, N)
-        dL = log(k[1])-log(k[0])
-        s = n*dL
 
-        cut = 4
-        high_s = s[s > cut]
-        low_s = s[s < -cut]
-        mid_high_s = s[(s <= cut) & (s > 0)]
-        mid_low_s = s[(s >= -cut) & (s < 0)]
-
-        Z = lambda r: (15/r-10*r+164*r**3-150*r**5+45*r**7+
-                       (15-15/r**2+90*r**2-210*r**4+165*r**6-
-                        45*r**8)*log((r+1)/np.absolute(r-1))/2)
-        Z_low = lambda r: 256/7*r+256/7/r-256/33/r**3-256/273/r**5-256/1001/r**7
-        Z_high = lambda r: 256*r**3-2304/7*r**5+3328/21*r**7
-
-        f_mid_low = Z(exp(-mid_low_s))
-        f_mid_high = Z(exp(-mid_high_s))
-        f_high = Z_high(exp(-high_s))
-        f_low = Z_low(exp(-low_s))
-
-        f = np.hstack((f_low, f_mid_low, 64, f_mid_high, f_high))
-        g = fftconvolve(P, f) * dL
-        g_k = g[N-1:2*N-1]
-        P_bar = 1/168*k**3/(2*pi)**2*P*g_k
+        P_bar = J3_integral(k, P)
         _, J3 = self.EK.PK_original(P_bar)
         self.cache.set(J3, "J3", hash_key, P_hash)
         return J3
@@ -968,8 +921,8 @@ class FASTPT:
         # Compute the (13)-integrals:
 
         J1 = P_13_reg(self.__k_final, self.Ps)/2
-        J2 = self.J2_integral(self.__k_final, self.Ps)
-        J3 = self.J3_integral(self.__k_final, self.Ps)
+        J2 = self.get_J2(self.__k_final, self.Ps)
+        J3 = self.get_J3(self.__k_final, self.Ps)
         _, J1 = self.EK.PK_original(J1)
 
 
