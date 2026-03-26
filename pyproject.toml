@@ -1,0 +1,50 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools", "wheel"]  # PEP 508 specifications.
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast-pt"
+dynamic = ["version"]
+requires-python = ">=3.7"
+description = "FAST-PT is a code to calculate quantities in cosmological perturbation theory at 1-loop (including, e.g., corrections to the matter power spectrum)."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Joseph E. McEwen" }, 
+    { name = "Xiao Fang" }, 
+    { name = "Jonathan Blazek" },
+    { email = "blazek@berkeley.edu" },
+    { name = "Vincent Schacknies" },
+    { email = "vincent.schacknies@icloud.com" }
+    ]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3',
+    'Topic :: Scientific/Engineering :: Astronomy',
+    'Topic :: Scientific/Engineering :: Physics'
+]
+keywords = [
+    'FASTPT',
+    'FAST-PT',
+    'Perturbation-Theory'
+]
+dependencies = [
+    "numpy>=1.17",
+    "scipy>=1.2",
+    "matplotlib>=3.0"
+]
+
+[project.optional-dependencies]
+
+[project.urls]
+homepage = "https://github.com/jablazek/FAST-PT"
+
+# Explicitly define where package is (same directory as .toml).
+# Include matches full name of module how it would be imported in Python.
+# (Based on guide here: https://setuptools.pypa.io/en/latest/userguide/package_discovery.html)
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["fastpt*"]

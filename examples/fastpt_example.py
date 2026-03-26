@@ -37,7 +37,7 @@ fpt=FASTPT(k,to_do=to_do,low_extrap=-5,high_extrap=3,n_pad=n_pad)
 t2=time()
 
 # calculate 1loop SPT (and time the operation)
-P_spt=fpt.one_loop_dd(P,C_window=C_window)
+P_spt=fpt.one_loop_dd_bias(P,C_window=C_window)
 
 t3=time()
 print('initialization time for', to_do, "%10.3f" %(t2-t1), 's')

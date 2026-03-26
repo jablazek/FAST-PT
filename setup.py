@@ -13,19 +13,4 @@ else:
     raise RuntimeError("Unable to find version string in %s." % (version_file,))
 print('FASTPT version is %s'%(fastpt_version))
 
-setup(
-    name='fast-pt',
-    description=(
-        "FAST-PT is a code to calculate quantities in cosmological "
-        "perturbation theory at 1-loop (including, e.g., corrections to the "
-        "matter power spectrum)."),
-    author="Joseph E. McEwen, Xiao Fang, and Jonathan Blazek (blazek@berkeley.edu)",
-    author_email="blazek@berkeley.edu",
-    packages=find_packages(),
-    install_requires=['numpy', 'scipy', 'matplotlib'],
-    version=fastpt_version,
-    license="MIT license",
-    url="https://github.com/JoeMcEwen/FAST-PT",
-    download_url="https://github.com/JoeMcEwen/FAST-PT/archive/v%s.zip"%fastpt_version,
-    
-)
+setup(version=fastpt_version, packages=find_packages())

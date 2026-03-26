@@ -41,7 +41,7 @@ n_pad=1000
 t1=time()
 # initialize the FASTPT class
 nu=-2
-fastpt=FASTPT.FASTPT(k,-2,n_pad=n_pad)
+fastpt=FASTPT(k,-2,n_pad=n_pad, simple=True)
 
 P_1loop=fastpt.one_loop(P_lin,C_window=C_window)
 _,Pd1d2, Pd2d2, Pd1s2, Pd2s2, Ps2s2, sig4 =fastpt.P_bias(P_lin,C_window=C_window)

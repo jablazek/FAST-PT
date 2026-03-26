@@ -1,0 +1,170 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog / Migration Guide &mdash; FAST-PT 4.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=3304f9e4"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Theory" href="theory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            FAST-PT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog / Migration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#major-changes">Major Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#minor-changes">Minor Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-improvements">Performance Improvements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#description-of-caching-system">Description of Caching System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-notes">Additional Notes</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">FAST-PT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Changelog / Migration Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/changelog.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="changelog-migration-guide">
+<span id="changelog"></span><h1>Changelog / Migration Guide<a class="headerlink" href="#changelog-migration-guide" title="Link to this heading"></a></h1>
+<p>This document details the changes between the original FAST-PT implementation and the current version.</p>
+<p>For previous versions’ changes, see the <a class="reference download internal" download="" href="_downloads/1abe55494b10c89f9d07e5e5009d7c70/usr_manual.pdf"><code class="xref download docutils literal notranslate"><span class="pre">complete</span> <span class="pre">changelog</span> <span class="pre">history</span></code></a>.</p>
+<p>NOTE: FAST-PT 4.0 is completely backwards compatible with FAST-PT 3.0. However, adjustments to your code may be required to take advantage of the new features and performance improvements.</p>
+<section id="major-changes">
+<h2>Major Changes<a class="headerlink" href="#major-changes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Caching: FAST-PT now caches individual terms and intermediate calculations to speed up computation.</p></li>
+<li><p>FPTHandler: The handler class has been introduced to improve the the user’s ability to manage FAST-PT and provide many new convenience features that compliment the FAST-PT class. NOTE: the FPTHandler class is not a replacement for the FAST-PT class, but rather a wrapper that provides additional functionality. It is not necessary for computation.</p></li>
+<li><p>To_do list: The to_do list is no longer needed to initialize FAST-PT. The terms will now be calculated as needed and stored as a property of the FAST-PT class.</p></li>
+</ul>
+</section>
+<section id="minor-changes">
+<h2>Minor Changes<a class="headerlink" href="#minor-changes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Simple flag: A new “simple” kwarg has been added to FAST-PT which will instead initialize an instance of FAST-PT simple.</p></li>
+<li><p>Private k: The input k is now “private” after initialization via Python’s name mangling. This means that the user cannot change the value of k after initialization but can still access the value of k.</p></li>
+<li><p>Gamma functions cache: A separate (and simpler) caching system has been implemented to cache gamma functions and save time on the calculation of the X terms.</p></li>
+<li><p>Parameter validation: The parameters P, P_window, and C_window are now validated at every function call to ensure that they have the proper traits needed for the calculation. This is done to prevent errors from propagating through the code and causing issues later on.</p></li>
+<li><p>N_pad default: If no n_pad is provided during initialization, the default value is now set to 0.5 * len(k).</p></li>
+<li><p>Nu deprecation: The nu parameter is now deprecated as it is no longer needed for initialization. It will default to -2 unless a different nu value is needed in which case it will be calculated internally.</p></li>
+<li><p>One_loop_dd return: One_loop_dd will only return P_1loop, Ps. Previously returned the dd_bias terms as well however this was contingent on the to_do list which is being deprecated.</p></li>
+<li><p>Cleft_QR: The Cleft_QR function has been removed due to missing internal functions.</p></li>
+</ul>
+</section>
+<section id="performance-improvements">
+<h2>Performance Improvements<a class="headerlink" href="#performance-improvements" title="Link to this heading"></a></h2>
+<p>The improvement in performance of FAST-PT is going to varry largely with your use case. However, about half of the calculation done for most terms was redundant granting a two times speedup do to the new caching system.
+FAST-PT also now calculates terms in a modular format. This means that the user can now choose to calculate only the terms they need, rather than all of the terms grouped into one FAST-PT function.
+This is done by using the FPTHandler class and the get method, or by calling compute_term with the necessary parameters for each term.
+This will greatly improve the performance of each FAST-PT function if your use case only requires a select few terms.</p>
+</section>
+<section id="description-of-caching-system">
+<h2>Description of Caching System<a class="headerlink" href="#description-of-caching-system" title="Link to this heading"></a></h2>
+<p>Caching in Fast-PT is done via a <a class="reference external" href="https://github.com/jablazek/FAST-PT/tree/master/fastpt/core/CacheManager.py">CacheManager</a> object that is initialized with the FAST-PT class. This cache tracks various different “layers” of the calculation of Fast-PT terms. These layers include:</p>
+<ul class="simple">
+<li><p>Individual Power Spectra: Fast-PT functions return a tuple of multiple power spectra, each of which is cached individually.</p></li>
+<li><p>Jk Scalar and Tensor Calculations: Most Fast-PT terms require the calculation of the Jk scalar or tensor functions. Some terms have identical parameters that are passed to these functions, so they are cached individually as well.</p></li>
+<li><p>Fourier Coefficients: Fourier coefficients of the user provided power spectra are cached and then used in the Jk functions.</p></li>
+<li><p>Convolutions: This is the convolution of the power spectrum fourier coefficients and the relevant k grid quantities (X terms). The convolution function is called with fourier coefficients and k grid quantities, which are dependent on the user provided k and P and cached individually.</p></li>
+</ul>
+<p>There is also a separate form of caching used for the k grid quantities (X terms) and the gamma functions used to calculate them. The gamma functions are cached outside the Fast-PT object as they will not be frequently changed, while the k grid quantities are cached as properties of the Fast-PT object and can be accessed via <cite>fastpt_instance.X_IA_A</cite> for example.
+In total, there are three forms of caching used in Fast-PT 4.0, two of which are stored within the object. The gamma functions cache will persist as long as the program runs.</p>
+<p>This multi-tiered caching system allows Fast-PT to avoid redundant calculations both on individual power spectra terms and the intermediate calculations that are needed to compute them.
+To avoid the cache from growing too large, a “dump_cache” flag is provided in initialization that, when True, will clear the cache when a new power spectra is inputted by the user. The user is also able to specify (during Fast-PT initialization) a maximum cache size in mb. This will evict cached items randomly (in linear time) to avoid slowing down the total computation time. However, the cache size limit is meant as a safeguard and should not be treated as a form of memory management for the program.</p>
+</section>
+<section id="additional-notes">
+<h2>Additional Notes<a class="headerlink" href="#additional-notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The 1loop term (one_loop_dd[0]) currently does not pass np.allclose due to numerical noise when compared with FAST-PT 3 when a C_window of 0.63 or less is provided. This only occurs at the very low k end and is negligible. This issue is currently being investigated and will be fixed in a future release.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theory.html" class="btn btn-neutral float-left" title="Theory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016-2025, FAST-PT developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 from __future__ import division 
 import numpy as np 
-from matter_power_spt import one_loop
-import FASTPT 
+from fastpt.utils.matter_power_spt import one_loop
+from fastpt import FASTPT 
 from time import time 
 
 # load the input power spectrum data 
@@ -28,7 +28,7 @@ P_window=np.array([.2,.2])
 C_window=.65	
 n_pad=1000
 # initialize the FASTPT class		
-fastpt=FASTPT.FASTPT(k,to_do=['RSD'],low_extrap=-6,high_extrap=4,n_pad=n_pad) 
+fastpt=FASTPT(k,to_do=['RSD'],low_extrap=-6,high_extrap=4,n_pad=n_pad) 
 	
 	
 t1=time()	

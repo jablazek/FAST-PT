@@ -1,0 +1,309 @@
+/* Astronomy/cosmology-inspired color scheme */
+:root {
+    --cosmology-dark: #0c1445;     /* Deep space blue */
+    --cosmology-accent: #5c67de;   /* Nebula purple-blue */
+    --cosmology-bright: #e63946;   /* Red shift */
+    --cosmology-light: #f1faee;    /* Star light */
+    --cosmology-deep: #070b24;     /* Deep space background */
+    --cosmology-gold: #ffd700;     /* Star gold */
+    --cosmology-green: #52b788;    /* Cosmic radiation */
+    --cosmology-purple: #9d4edd;   /* Galaxy spiral */
+}
+
+/* Galaxy-inspired background for the main content */
+body {
+    background: linear-gradient(125deg, var(--cosmology-deep) 0%, var(--cosmology-dark) 100%);
+    color: var(--cosmology-light);
+}
+
+/* Fix for content offset */
+.wy-nav-content-wrap {
+    margin-left: 300px;  /* Match sidebar width */
+    background: transparent;
+    min-height: 100vh;
+    width: calc(100% - 300px);  /* Account for sidebar */
+}
+
+@media screen and (max-width: 768px) {
+    .wy-nav-content-wrap {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Ensure content fills available space */
+.wy-nav-content {
+    max-width: 100%;
+    width: calc(100% - 30px);  /* Account for margins/padding */
+    margin: 10px 15px;
+    padding: 1.618em 3.236em;
+    background: linear-gradient(to bottom right,
+                rgba(12, 20, 69, 0.97),
+                rgba(16, 26, 85, 0.97),
+                rgba(20, 29, 95, 0.97));
+    border-radius: 8px;
+    box-shadow: 0 0 25px rgba(92, 103, 222, 0.15);
+}
+
+@media screen and (max-width: 768px) {
+    .wy-nav-content {
+        padding: 1em;
+    }
+}
+
+/* Fix sidebar width to be consistent */
+.wy-nav-side {
+    width: 300px;
+    background: var(--cosmology-deep);
+    position: relative;
+    overflow: hidden;
+}
+
+.wy-nav-side::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                      radial-gradient(circle, rgba(255,255,255,0.07) 2px, transparent 2px),
+                      radial-gradient(circle, rgba(255,255,255,0.05) 3px, transparent 3px);
+    background-size: 100px 100px, 200px 200px, 300px 300px;
+    pointer-events: none;
+}
+
+/* Modify the sidebar style */
+.wy-side-nav-search, .wy-nav-top {
+    background: linear-gradient(135deg, var(--cosmology-dark) 0%, var(--cosmology-deep) 100%);
+    border-bottom: 1px solid rgba(92, 103, 222, 0.3);
+}
+
+/* Adjust navigation top for mobile */
+.wy-nav-top {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+}
+
+/* Search box cosmic styling */
+.wy-side-nav-search input[type="text"] {
+    border: 1px solid var(--cosmology-accent);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 5px rgba(92, 103, 222, 0.5);
+    color: var(--cosmology-light);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.wy-side-nav-search input[type="text"]:focus {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(92, 103, 222, 0.8);
+}
+
+/* Menu styling */
+.wy-menu-vertical li.current {
+    background: rgba(92, 103, 222, 0.1);
+    border-left: 2px solid var(--cosmology-accent);
+}
+
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+    color: var(--cosmology-gold);
+    letter-spacing: 1px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* Style for headers with cosmic gradient effect */
+h1 {
+    background: linear-gradient(90deg, var(--cosmology-accent), var(--cosmology-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--cosmology-accent);
+}
+
+h2, h3 {
+    color: var(--cosmology-gold);
+}
+
+/* Custom styling for code blocks - make them look like terminals */
+div[class^="highlight"] {
+    background: rgba(7, 11, 36, 0.8) !important;
+    border-left: 3px solid var(--cosmology-accent);
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(92, 103, 222, 0.15);
+    margin: 15px 0;
+    width: 100%;
+}
+
+div[class^="highlight"] pre {
+    color: var(--cosmology-light);
+}
+
+/* Python syntax highlighting customization */
+.highlight .kn, .highlight .k, .highlight .ow { color: var(--cosmology-purple); } /* import, keywords */
+.highlight .s1, .highlight .s2, .highlight .sa { color: var(--cosmology-green); } /* strings */
+.highlight .mi, .highlight .mf { color: var(--cosmology-bright); } /* numbers */
+.highlight .n { color: var(--cosmology-light); } /* variables */
+.highlight .o { color: var(--cosmology-gold); } /* operators */
+.highlight .c1, .highlight .cm { color: rgba(241, 250, 238, 0.5); } /* comments */
+
+/* Custom link colors with hover effect */
+a {
+    color: var(--cosmology-accent);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+}
+
+a:hover {
+    color: var(--cosmology-bright);
+    border-bottom: 1px dotted var(--cosmology-bright);
+    text-shadow: 0 0 5px rgba(230, 57, 70, 0.3);
+}
+
+/* Parameter tables with cosmic styling */
+table.docutils {
+    border: 1px solid rgba(92, 103, 222, 0.3);
+    box-shadow: 0 0 15px rgba(92, 103, 222, 0.1);
+    border-radius: 5px;
+}
+
+table.docutils thead th {
+    background: linear-gradient(90deg, var(--cosmology-deep), var(--cosmology-dark));
+    color: var(--cosmology-gold);
+}
+
+table.docutils tr:nth-child(odd) {
+    background: rgba(12, 20, 69, 0.3);
+}
+
+/* Function signatures cosmic effect */
+dl.py.method, dl.py.class, dl.py.function {
+    background: rgba(12, 20, 69, 0.3);
+    border-left: 3px solid var(--cosmology-accent);
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15px 0;
+    box-shadow: 0 0 10px rgba(92, 103, 222, 0.1);
+}
+
+dt.sig.sig-object.py {
+    font-family: monospace;
+    font-weight: bold;
+    color: var(--cosmology-light);
+    text-shadow: 0 0 5px rgba(92, 103, 222, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--cosmology-deep);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--cosmology-accent);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--cosmology-bright);
+}
+
+/* Navigation buttons cosmic style */
+.btn {
+    background: linear-gradient(135deg, var(--cosmology-dark) 0%, var(--cosmology-accent) 100%);
+    border: none;
+    color: var(--cosmology-light);
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(92, 103, 222, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    box-shadow: 0 0 15px rgba(92, 103, 222, 0.7);
+    transform: translateY(-1px);
+}
+
+/* Footer cosmic styling */
+footer {
+    background: linear-gradient(to right, var(--cosmology-deep), var(--cosmology-dark));
+    border-top: 1px solid rgba(92, 103, 222, 0.3);
+    color: rgba(241, 250, 238, 0.7);
+}
+
+/* Version selector styling */
+.rst-versions {
+    background: var(--cosmology-deep);
+}
+
+.rst-versions .rst-current-version {
+    background: var(--cosmology-dark);
+    color: var(--cosmology-light);
+}
+
+/* Source links with cosmic styling */
+.viewcode-link, .viewcode-back {
+    color: var(--cosmology-green);
+}
+
+/* Improve admonitions/notes styling */
+.admonition {
+    background: rgba(12, 20, 69, 0.3);
+    border-left: 3px solid var(--cosmology-accent);
+    border-radius: 5px;
+}
+
+.admonition-title {
+    background: rgba(92, 103, 222, 0.2);
+    color: var(--cosmology-gold);
+}
+
+/* Source code view link */
+.wy-breadcrumbs .wy-breadcrumbs-aside a {
+    background: linear-gradient(135deg, var(--cosmology-accent) 0%, var(--cosmology-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+}
+
+/* Fix for scrolling and layout issues */
+html {
+    scroll-padding-top: 72px; /* Helps with anchor links */
+}
+
+/* Make sure the main container has the right positioning */
+.wy-grid-for-nav {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;  /* Change from flex to block to fix layout issues */
+}
+
+/* Fix main section width */
+.section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Make document container take full width */
+.document {
+    width: 100%;
+    padding: 0;
+}
+
+/* Fix image sizing */
+img {
+    max-width: 100%;
+    height: auto;
+}
