@@ -841,7 +841,7 @@ class FASTPT:
         P_mat = np.multiply(coef, np.transpose(mat))
         Inm = np.sum(P_mat, 1)
         if index in [5,7,8,9]:
-            Inm /= self.__k_final**2
+            Inm /= self.__k_extrap**2
         self.cache.set(Inm, "I"+indices[index], hash_key, P_hash)
         return Inm, Ps
 
@@ -922,9 +922,9 @@ class FASTPT:
     def eft_integrals_Jk(self, P, P_window=None, C_window=None, remove_lowk=False):
         # Compute the (13)-integrals:
 
-        J1 = P_13_reg(self.__k_final, self.Ps)/2
-        J2 = self.get_J2(self.__k_final, self.Ps)
-        J3 = self.get_J3(self.__k_final, self.Ps)
+        J1 = P_13_reg(self.__k_extrap, self.Ps)/2
+        J2 = self.get_J2(self.__k_extrap, self.Ps)
+        J3 = self.get_J3(self.__k_extrap, self.Ps)
         _, J1 = self.EK.PK_original(J1)
 
 
