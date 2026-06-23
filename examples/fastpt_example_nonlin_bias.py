@@ -5,6 +5,7 @@ Makes a plot for P_22 + P_13
 
 from time import time
 import matplotlib
+matplotlib.use('Agg')
 import sys, os
 import numpy as np
 import matplotlib.pyplot as plt
