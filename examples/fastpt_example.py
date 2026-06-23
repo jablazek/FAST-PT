@@ -50,7 +50,7 @@ P_IA_mix=fpt.IA_mix(P,C_window=C_window)
 P_RSD=fpt.RSD_components(P,1.0,C_window=C_window)
 P_kPol=fpt.kPol(P,C_window=C_window)
 P_OV=fpt.OV(P,C_window=C_window)
-sig4=fpt.sig4
+sig4=P_spt[7]
 
 # make a plot of 1loop SPT results
 

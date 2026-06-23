@@ -883,7 +883,7 @@ class FPTHandler:
         """
         Load parameters and recreate Handler and Fast-PT instances from a saved .npz file.
         
-        Loads both array and non-array parameters from a file created with save_params().
+        Loads both array and non-array parameters from a file created with save_instance().
         Arrays are loaded directly, while scalar values are extracted from the metadata.
         
         Parameters

@@ -54,7 +54,7 @@ def J_table(params):
 				if (B!=0):
 					#x=np.array([alpha,beta,l1,l2,l,J1,J2,Jk,A,B],dtype=float)
 					x=np.array([alpha,beta,l1,l2,l,J1,J2,Jk,A,B],dtype=object)
-					table=np.row_stack((table,x))
+					table=np.vstack((table,x))
 
 	# return the table, excluding the first row of all zeros
 	return table[1:,:]
