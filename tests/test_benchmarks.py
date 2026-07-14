@@ -37,6 +37,37 @@ def calc_and_show(bmark, stored, func):
         plt.legend()
         plt.show()
 
+
+def assert_benchmark(bmark, stored, name, loose_atol=1e-3, loose_rtol=1e-3):
+    """Compare a computed benchmark against stored reference values.
+
+    Passes silently when the arrays match at ``np.allclose`` defaults (strict).
+    If the strict comparison fails but the arrays still agree at a looser
+    tolerance (``loose_atol``/``loose_rtol``), the discrepancy is treated as
+    benign floating-point noise -- e.g. from a different NumPy/Python version or
+    CPU architecture than the one the benchmark was generated on -- and the test
+    is marked xfail with an explanatory message. If the arrays disagree even at
+    the loose tolerance, that likely signals a real regression and the test
+    fails hard.
+    """
+    bmark = np.asarray(bmark)
+    stored = np.asarray(stored)
+    if np.allclose(bmark, stored):
+        return
+    max_abs_diff = np.max(np.abs(bmark - stored))
+    if np.allclose(bmark, stored, atol=loose_atol, rtol=loose_rtol):
+        pytest.xfail(
+            f"{name}: matches the stored benchmark at a loose tolerance "
+            f"(atol={loose_atol}, rtol={loose_rtol}; max abs diff "
+            f"{max_abs_diff:.2e}) but not at np.allclose defaults. This is "
+            f"consistent with floating-point differences across NumPy/Python "
+            f"versions or CPU architecture, not a code error.")
+    raise AssertionError(
+        f"{name}: differs from the stored benchmark beyond the loose tolerance "
+        f"(atol={loose_atol}, rtol={loose_rtol}; max abs diff {max_abs_diff:.2e}). "
+        f"This exceeds expected floating-point noise and likely indicates a real "
+        f"problem, not just a NumPy/platform difference.")
+
 @pytest.mark.skipif(
         sys.version_info >= (3, 13) or platform.machine() == "arm64",
         reason="Strict benchmark comparison is not reliable on Python 3.13+ or ARM64 runners"
@@ -106,36 +137,24 @@ def test_IA_TT(fpt):
     bmark = np.transpose(fpt.IA_tt(P, C_window=C_window))
     assert np.allclose(bmark, np.loadtxt('tests/benchmarking/PIA_tt_benchmark.txt'))
     
-@pytest.mark.xfail(
-        sys.version_info <= (3, 14) or platform.machine() == "arm64",
-        reason="Benchmark comparison expected to fail: benchmarks were regenerated on the current NumPy (2.x), but small numerical differences (up to ~2e-4 in absolute value) still arise across Python versions (e.g. Python 3.14) or on ARM64 runners",
-        strict=False,
-    )
 def test_IA_mix(fpt):
     bmark = np.transpose(fpt.IA_mix(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_mix_benchmark.txt'))
+    stored = np.loadtxt('tests/benchmarking/P_IA_mix_benchmark.txt')
+    assert_benchmark(bmark, stored, "IA_mix")
 
-@pytest.mark.xfail(
-        sys.version_info <= (3, 14) or platform.machine() == "arm64",
-        reason="Benchmark comparison expected to fail: benchmarks were regenerated on the current NumPy (2.x), but small numerical differences (up to ~2e-4 in absolute value) still arise across Python versions (e.g. Python 3.14) or on ARM64 runners",
-        strict=False,
-    )
 def test_IA_ta(fpt):
     bmark = np.transpose(fpt.IA_ta(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_ta_benchmark.txt'))
+    stored = np.loadtxt('tests/benchmarking/P_IA_ta_benchmark.txt')
+    assert_benchmark(bmark, stored, "IA_ta")
 
 def test_IA_der(fpt):
     bmark = np.transpose(fpt.IA_der(P, C_window=C_window))
     assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_der_benchmark.txt'))
 
-@pytest.mark.xfail(
-        sys.version_info <= (3, 14) or platform.machine() == "arm64",
-        reason="Benchmark comparison expected to fail: benchmarks were regenerated on the current NumPy (2.x), but small numerical differences (up to ~2e-4 in absolute value) still arise across Python versions (e.g. Python 3.14) or on ARM64 runners",
-        strict=False,
-    )
 def test_IA_ct(fpt):
     bmark = np.transpose(fpt.IA_ct(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_ct_benchmark.txt'))
+    stored = np.loadtxt('tests/benchmarking/P_IA_ct_benchmark.txt')
+    assert_benchmark(bmark, stored, "IA_ct")
 
 def test_gI_ct(fpt):
     bmark = np.transpose(fpt.gI_ct(P, C_window=C_window))
@@ -161,23 +180,15 @@ def test_RSD_components(fpt):
     bmark = np.transpose(fpt.RSD_components(P, 1.0, C_window=C_window))
     assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_RSD_benchmark.txt'))
 
-@pytest.mark.xfail(
-        sys.version_info <= (3, 14) or platform.machine() == "arm64",
-        reason="Benchmark comparison expected to fail: benchmarks were regenerated on the current NumPy (2.x), but small numerical differences (up to ~2e-4 in absolute value) still arise across Python versions (e.g. Python 3.14) or on ARM64 runners",
-        strict=False,
-    )
 def test_RSD_ABsum_components(fpt):
     bmark = np.transpose(fpt.RSD_ABsum_components(P, 1.0, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_RSD_ABsum_components_benchmark.txt'))
+    stored = np.loadtxt('tests/benchmarking/P_RSD_ABsum_components_benchmark.txt')
+    assert_benchmark(bmark, stored, "RSD_ABsum_components")
 
-@pytest.mark.xfail(
-        sys.version_info <= (3, 14) or platform.machine() == "arm64",
-        reason="Benchmark comparison expected to fail: benchmarks were regenerated on the current NumPy (2.x), but small numerical differences (up to ~2e-4 in absolute value) still arise across Python versions (e.g. Python 3.14) or on ARM64 runners",
-        strict=False,
-    )
 def test_RSD_ABsum_mu(fpt):
     bmark = np.transpose(fpt.RSD_ABsum_mu(P, 1.0, 1.0, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_RSD_ABsum_mu_benchmark.txt'))
+    stored = np.loadtxt('tests/benchmarking/P_RSD_ABsum_mu_benchmark.txt')
+    assert_benchmark(bmark, stored, "RSD_ABsum_mu")
 
 @pytest.mark.skipif(
         sys.version_info >= (3, 13) or platform.machine() == "arm64",
