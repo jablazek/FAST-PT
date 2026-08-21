@@ -14,9 +14,7 @@ except:
     # then default to the new version as it is probably
     # something experimental
     scipy_new = True
-
-if scipy_new:
-    warnings.warn("Benchmarks will fail on scipy v1.18 due to a change in FFT backend")
+scipy_new_tag = "_scipy_1.18" if scipy_new else ""
 
 data_path = os.path.join(os.path.dirname(__file__), 'benchmarking', 'Pk_test.dat')
 d = np.loadtxt(data_path)
@@ -120,11 +118,11 @@ def test_IA_TT(fpt):
 
 def test_IA_mix(fpt):
     bmark = np.transpose(fpt.IA_mix(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_mix_benchmark.txt'))
+    assert np.allclose(bmark, np.loadtxt(f'tests/benchmarking/P_IA_mix_benchmark{scipy_new_tag}.txt'))
 
 def test_IA_ta(fpt):
     bmark = np.transpose(fpt.IA_ta(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_ta_benchmark.txt'))
+    assert np.allclose(bmark, np.loadtxt(f'tests/benchmarking/P_IA_ta_benchmark{scipy_new_tag}.txt'))
 
 def test_IA_der(fpt):
     bmark = np.transpose(fpt.IA_der(P, C_window=C_window))
@@ -132,7 +130,7 @@ def test_IA_der(fpt):
 
 def test_IA_ct(fpt):
     bmark = np.transpose(fpt.IA_ct(P, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_IA_ct_benchmark.txt'))
+    assert np.allclose(bmark, np.loadtxt(f'tests/benchmarking/P_IA_ct_benchmark{scipy_new_tag}.txt'))
 
 def test_gI_ct(fpt):
     bmark = np.transpose(fpt.gI_ct(P, C_window=C_window))
@@ -160,11 +158,11 @@ def test_RSD_components(fpt):
 
 def test_RSD_ABsum_components(fpt):
     bmark = np.transpose(fpt.RSD_ABsum_components(P, 1.0, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_RSD_ABsum_components_benchmark.txt'))
+    assert np.allclose(bmark, np.loadtxt(f'tests/benchmarking/P_RSD_ABsum_components_benchmark{scipy_new_tag}.txt'))
 
 def test_RSD_ABsum_mu(fpt):
     bmark = np.transpose(fpt.RSD_ABsum_mu(P, 1.0, 1.0, C_window=C_window))
-    assert np.allclose(bmark, np.loadtxt('tests/benchmarking/P_RSD_ABsum_mu_benchmark.txt'))
+    assert np.allclose(bmark, np.loadtxt(f'tests/benchmarking/P_RSD_ABsum_mu_benchmark{scipy_new_tag}.txt'))
 
 @pytest.mark.skipif(
         sys.version_info >= (3, 13) or platform.machine() == "arm64",
