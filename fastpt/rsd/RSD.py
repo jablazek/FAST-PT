@@ -37,7 +37,7 @@ def RSD_vals(l_mat,id):
     for i in range(l_mat.shape[0]):
         x=J_table(l_mat[i,idrow])
 
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 

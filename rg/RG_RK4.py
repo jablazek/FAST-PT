@@ -86,7 +86,7 @@ def RG_RK4(name,k,P,d_lambda,max,n_pad,P_window,C_window):
 
 		# update data for saving
 		d_update=np.append(Lambda,P)
-		d_out=np.row_stack((d_out,d_update))
+		d_out=np.vstack((d_out,d_update))
 		# set to True to check at each step
 		if (False):
 

@@ -11,6 +11,6 @@ def OV():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat.shape[0]):
 		x=J_table(l_mat[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 
 	return table[1:,:]

@@ -16,7 +16,7 @@ def IA_tij_feG2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_feG2.shape[0]):
         x=J_table(l_mat_tij_feG2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_heG2():
@@ -37,7 +37,7 @@ def IA_tij_heG2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_heG2.shape[0]):
         x=J_table(l_mat_tij_heG2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_F2F2():
@@ -52,7 +52,7 @@ def IA_tij_F2F2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2F2.shape[0]):
         x=J_table(l_mat_tij_F2F2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_G2G2():
@@ -67,7 +67,7 @@ def IA_tij_G2G2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_G2G2.shape[0]):
         x=J_table(l_mat_tij_G2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_F2G2():
@@ -82,7 +82,7 @@ def IA_tij_F2G2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2G2.shape[0]):
         x=J_table(l_mat_tij_F2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def P_IA_13G(k,P):
@@ -178,7 +178,7 @@ def IA_tij_F2G2reg():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2G2.shape[0]):
         x=J_table(l_mat_tij_F2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 

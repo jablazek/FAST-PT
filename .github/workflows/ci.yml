@@ -17,7 +17,9 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.13", "3.11", "3.9"]
+        python-version: ["3.14", "3.13", "3.12"]
+        numpy-version: ["2.4", "2.5"]
+        scipy-version: ["1.17.1", "1.18.0"]
 
     steps:
       - name: Checkout repository
@@ -31,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install numpy==${{ matrix.numpy-version }} scipy==${{ matrix.scipy-version }} "matplotlib>=3.0"
           pip install -e .
-          pip install numpy==1.26.4
           pip install pytest
 
       - name: Run unit/benchmark tests

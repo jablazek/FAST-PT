@@ -752,7 +752,7 @@ class FASTPT:
         # Returns relevant correlations (including contraction factors),
         # but WITHOUT bias values and other pre-factors.
         # Uses standard "full initialization" of J terms
-        sig4 = np.trapz(self.k_extrap ** 3 * Ps ** 2, x=np.log(self.k_extrap)) / (2. * pi ** 2)
+        sig4 = np.trapezoid(self.k_extrap ** 3 * Ps ** 2, x=np.log(self.k_extrap)) / (2. * pi ** 2)
         self.cache.set(sig4, "sig4", hash_key, P_hash)
         return sig4
 
