@@ -23,17 +23,17 @@ def kPol():
 	for i in range(l_mat1.shape[0]):
 
 		x=J_table(l_mat1[i])
-		table1=np.row_stack((table1,x))
+		table1=np.vstack((table1,x))
 
 	table2=np.zeros(10,dtype=float)
 	for i in range(l_mat2.shape[0]):
 
 		x=J_table(l_mat2[i])
-		table2=np.row_stack((table2,x))
+		table2=np.vstack((table2,x))
 
 	table3=np.zeros(10,dtype=float)
 	for i in range(l_mat3.shape[0]):
 
 		x=J_table(l_mat3[i])
-		table3=np.row_stack((table3,x))
+		table3=np.vstack((table3,x))
 	return table1[1:,:], table2[1:,:], table3[1:,:]

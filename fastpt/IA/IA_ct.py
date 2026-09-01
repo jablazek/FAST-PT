@@ -16,7 +16,7 @@ def IA_tij_feG2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_feG2.shape[0]):
         x=J_table(l_mat_tij_feG2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_heG2():
@@ -37,7 +37,7 @@ def IA_tij_heG2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_heG2.shape[0]):
         x=J_table(l_mat_tij_heG2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_F2F2():
@@ -48,11 +48,11 @@ def IA_tij_F2F2():
             [2,-2,0,0,0,1/6],\
             [2,-2,0,0,2,1/3],\
             [1,-1,0,0,1,62/35],\
-            [1,-1,0,0,4,8/35]], dtype=float)
+            [1,-1,0,0,3,8/35]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2F2.shape[0]):
         x=J_table(l_mat_tij_F2F2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_G2G2():
@@ -63,11 +63,11 @@ def IA_tij_G2G2():
             [2,-2,0,0,0,1/6],\
             [2,-2,0,0,2,1/3],\
             [1,-1,0,0,1,54/35],\
-            [1,-1,0,0,4,16/35]], dtype=float)
+            [1,-1,0,0,3,16/35]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_G2G2.shape[0]):
         x=J_table(l_mat_tij_G2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_tij_F2G2():
@@ -78,11 +78,11 @@ def IA_tij_F2G2():
             [2,-2,0,0,0,1/6],\
             [2,-2,0,0,2,1/3],\
             [1,-1,0,0,1,58/35],\
-            [1,-1,0,0,4,12/35]], dtype=float)
+            [1,-1,0,0,3,12/35]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2G2.shape[0]):
         x=J_table(l_mat_tij_F2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def P_IA_13G(k,P):
@@ -174,11 +174,11 @@ def IA_tij_F2G2reg():
             [0,0,0,0,4,64/1715],\
             [2,-2,0,0,2,1/3],\
             [1,-1,0,0,1,58/35],\
-            [1,-1,0,0,4,12/35]], dtype=float)
+            [1,-1,0,0,3,12/35]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_tij_F2G2.shape[0]):
         x=J_table(l_mat_tij_F2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 
