@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fast-pt"
 dynamic = ["version"]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 description = "FAST-PT is a code to calculate quantities in cosmological perturbation theory at 1-loop (including, e.g., corrections to the matter power spectrum)."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -32,9 +32,9 @@ keywords = [
     'Perturbation-Theory'
 ]
 dependencies = [
-    "numpy>=1.17",
-    "scipy>=1.2",
-    "matplotlib>=3.0"
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "matplotlib>=3.9"
 ]
 
 [project.optional-dependencies]

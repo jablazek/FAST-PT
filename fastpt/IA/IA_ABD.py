@@ -70,7 +70,7 @@ def IA_A():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_IAA.shape[0]):
 		x=J_table(l_mat_IAA[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]
 
 def IA_DEE():
@@ -85,7 +85,7 @@ def IA_DEE():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_DEE.shape[0]):
 		x=J_table(l_mat_DEE[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]
 
 def IA_DBB():
@@ -100,5 +100,5 @@ def IA_DBB():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_DBB.shape[0]):
 		x=J_table(l_mat_DBB[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]

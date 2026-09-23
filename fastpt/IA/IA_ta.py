@@ -47,7 +47,7 @@ def IA_deltaE1():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_deltaE1.shape[0]):
 		x=J_table(l_mat_deltaE1[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]
 
 
@@ -61,7 +61,7 @@ def IA_0E0E():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_0E0E.shape[0]):
 		x=J_table(l_mat_0E0E[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]
 
 
@@ -75,5 +75,5 @@ def IA_0B0B():
 	table=np.zeros(10,dtype=float)
 	for i in range(l_mat_0B0B.shape[0]):
 		x=J_table(l_mat_0B0B[i])
-		table=np.row_stack((table,x))
+		table=np.vstack((table,x))
 	return table[1:,:]

@@ -752,7 +752,7 @@ class FASTPT:
         # Returns relevant correlations (including contraction factors),
         # but WITHOUT bias values and other pre-factors.
         # Uses standard "full initialization" of J terms
-        sig4 = np.trapz(self.k_extrap ** 3 * Ps ** 2, x=np.log(self.k_extrap)) / (2. * pi ** 2)
+        sig4 = np.trapezoid(self.k_extrap ** 3 * Ps ** 2, x=np.log(self.k_extrap)) / (2. * pi ** 2)
         self.cache.set(sig4, "sig4", hash_key, P_hash)
         return sig4
 
@@ -804,10 +804,10 @@ class FASTPT:
         result = self.cache.get("Ps2s2", hash_key)
         if result is not None: return result
         _, mat = self.J_k_scalar(P, self.X_spt, -2, P_window=P_window, C_window=C_window)
-        Pd2s2 = 2. * (4. / 45 * mat[0, :] + 8. / 63 * mat[1, :] + 8. / 35 * mat[2, :])
-        Pd2s2 = self._apply_extrapolation(Pd2s2)
-        self.cache.set(Pd2s2, "Ps2s2", hash_key, P_hash)
-        return Pd2s2
+        Ps2s2 = 2. * (4. / 45 * mat[0, :] + 8. / 63 * mat[1, :] + 8. / 35 * mat[2, :])
+        Ps2s2 = self._apply_extrapolation(Ps2s2)
+        self.cache.set(Ps2s2, "Ps2s2", hash_key, P_hash)
+        return Ps2s2
 
     
     def one_loop_dd_bias_b3nl(self, P, P_window=None, C_window=None):

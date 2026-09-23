@@ -70,7 +70,7 @@ for name, arr in names.items():
         print(AttributeError.with_traceback())
 
 inhomogeneous_arrays = {
-    'P_loop_bias': list(P_loop_bias), #Have to cast to list since tuple is immutable
+    'P_bias': list(P_loop_bias), #Have to cast to list since tuple is immutable
     'P_bias_b3nl': list(P_bias_b3nl),
     'P_bias_lpt_NL': list(P_bias_lpt_NL),
 }

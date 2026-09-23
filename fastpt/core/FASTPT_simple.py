@@ -271,8 +271,8 @@ class FASTPT:
 		# Uses standard "full initialization" of J terms
 
 		Power, mat=self.J_k(P,P_window=P_window,C_window=C_window)
-		sig4=np.trapz(self.k_old**2*Power**2,x=self.k_old)/(2.*pi**2)
-		#sig2=np.trapz(self.k_old**2*Power,x=self.k_old)/(2.*pi**2)
+		sig4=np.trapezoid(self.k_old**2*Power**2,x=self.k_old)/(2.*pi**2)
+		#sig2=np.trapezoid(self.k_old**2*Power,x=self.k_old)/(2.*pi**2)
 
 		Pd1d2=2.*(17./21*mat[0,:]+mat[4,:]+4./21*mat[1,:])
 		Pd2d2=2.*(mat[0,:])

@@ -13,7 +13,7 @@ def IA_gb2_F2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_F2.shape[0]):
         x=J_table(l_mat_gb2_F2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_gb2_G2():
@@ -25,7 +25,7 @@ def IA_gb2_G2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_G2.shape[0]):
         x=J_table(l_mat_gb2_G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_gb2_S2F2():
@@ -40,7 +40,7 @@ def IA_gb2_S2F2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_S2F2.shape[0]):
         x=J_table(l_mat_gb2_S2F2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]
 
 def IA_gb2_S2G2():
@@ -55,5 +55,5 @@ def IA_gb2_S2G2():
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_S2G2.shape[0]):
         x=J_table(l_mat_gb2_S2G2[i])
-        table=np.row_stack((table,x))
+        table=np.vstack((table,x))
     return table[1:,:]

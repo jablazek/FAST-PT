@@ -29,4 +29,4 @@ handler.plot(data=result, title="P_1loop")
 # # Save the results and your parameters
 handler.output_dir = "output"
 handler.save_output(result, "one_loop_dd")
-handler.save_params("params.npz")
+handler.save_instance("params.npz")

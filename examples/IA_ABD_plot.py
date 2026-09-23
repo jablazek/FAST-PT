@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 rc('font',**{'family':'serif','serif':['Times','Palatino']})
-rc('text', usetex=True)
+rc('text', usetex=True)  # set True only if a LaTeX install (latex/dvipng) is available
 
 IA_A=IA_A[98:599]
 IA_DEE=IA_DEE[98:599]
