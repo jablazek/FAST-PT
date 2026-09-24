@@ -1,4 +1,4 @@
-'''
+r'''
 	FASTPT is a numerical algorithm to calculate
 	1-loop contributions to the matter power spectrum
 	and other integrals of a similar type.
@@ -218,7 +218,7 @@ class FASTPT:
                 print('*** Warning ***')
                 print(f'You should consider increasing your zero padding to at least {n_pad_check}')
                 print('to ensure that the minimum k_output is > 2k_min in the FASTPT universe.')
-                print(f'k_min in the FASTPT universe is {k[0]} while k_min_input is {self.k_extrap[0]}')
+                print(f'k_min in the FASTPT universe is {k[0]} while k_min after extrapolation is {self.k_extrap[0]}')
 
         self.__k_final = k #log spaced k, with padding and extrap
         self.k_size = k.size

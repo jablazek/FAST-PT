@@ -1,4 +1,4 @@
-''' 
+r'''
     python version of FFTLOG by Andrew Hamilton. I am it calling LOG Hankel Transfrom
     This version of the fast Hankle transform is due to 
     Andrew Hamilton (see http://casa.colorado.edu/~ajsh/FFTLog/). 
