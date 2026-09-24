@@ -55,7 +55,7 @@ def IA_gb2_he():
             [0,0,2,0,0,-1/3],\
             [0,0,0,0,2,-1/3],\
             [0,0,1,1,1,3/2],\
-            [0,0,2,0,0,-1/3]],dtype=float)
+            [0,0,0,2,0,-1/3]],dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_he.shape[0]):
         x=J_table(l_mat_gb2_he[i])
@@ -109,7 +109,7 @@ def IA_gb2_S2G2():
             [1,-1,0,0,1,2/15],\
             [1,-1,0,0,3,1/5],\
             [-1,1,0,0,1,2/15],\
-            [-1,1,0,0,1,1/5]],dtype=float)
+            [-1,1,0,0,3,1/5]],dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_S2G2.shape[0]):
         x=J_table(l_mat_gb2_S2G2[i])
