@@ -132,7 +132,7 @@ if __name__=="__main__":
 	#ax.set_ylim(.99,1.01)
 	ax.set_yscale('log')
 	#P3=BW_filter(P0)
-	ax.plot(k[:-2],np.absolute(np.diff(P0,2)), label='orginal')
+	ax.plot(k[:-2],np.absolute(np.diff(P0,2)), label='original')
 	ax.plot(k[:-2],np.absolute(np.diff(P1,2)), '--', label='high filtered')
 
 
@@ -145,7 +145,7 @@ if __name__=="__main__":
 	P1=filter_highk(k,P0,1,5)
 	P2=filter_lowk(k,P0,.01,.05)
 
-	ax.plot(k[:-2],np.absolute(np.diff(P0,2)), label='orginal')
+	ax.plot(k[:-2],np.absolute(np.diff(P0,2)), label='original')
 	ax.plot(k[:-2],np.absolute(np.diff(P2,2)), '--', label='low filtered')
 
 

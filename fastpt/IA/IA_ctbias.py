@@ -5,7 +5,7 @@ import sys
 from time import time
 
 def IA_gb2_F2():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_F2=np.array([[0,0,0,0,0,17/21],\
             [0,0,0,0,2,4/21],\
             [1,-1,0,0,1,1/2],\
@@ -17,7 +17,7 @@ def IA_gb2_F2():
     return table[1:,:]
 
 def IA_gb2_G2():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_G2=np.array([[0,0,0,0,0,13/21],\
             [0,0,0,0,2,8/21],\
             [1,-1,0,0,1,1/2],\
@@ -29,7 +29,7 @@ def IA_gb2_G2():
     return table[1:,:]
 
 def IA_gb2_S2F2():
-     # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+     # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2F2=np.array([[0,0,0,0,0,8/315],\
             [0,0,0,0,2,254/441],\
             [0,0,0,0,4,16/245],\
@@ -44,7 +44,7 @@ def IA_gb2_S2F2():
     return table[1:,:]
 
 def IA_gb2_S2G2():
-     # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+     # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2G2=np.array([[0,0,0,0,0,16/315],\
             [0,0,0,0,2,214/441],\
             [0,0,0,0,4,32/245],\

@@ -421,9 +421,9 @@ class FPTHandler:
             #^^ also needs Pd1d1 and Pd1k2
             "pii": ("a00e", "c00e", "a0e0e", "a0b0b", "ae2e2", "ab2b2", "a0e2", 
                     "b0e2", "d0ee2", "d0bb2", "tijsij", "tijdsij", "tij2sij", "tijtij", "Pak2"),
-            #^^ also needs Pd1d1, Pak2 has a weird if chek_h
+            #^^ also needs Pd1d1, Pak2 has a weird if check_h
             "pim": ("a00e", "c00e", "a0e2", "b0e2", "tijsij", "Pak2"),
-            #^^ also needs Pd1d1, Pak2 has a weird if chek_h
+            #^^ also needs Pd1d1, Pak2 has a weird if check_h
             "pmm": ("P_1loop",)  # Note: Added comma to make it a tuple
         }
 
@@ -1217,7 +1217,7 @@ class FPTHandler:
 
             - single: generate one power spectra with the given params, which should be passed as floats or bools
             - bulk: generate multiple power spectra with the given params, which should be passed as lists or np arrays. If any of the params lists are shorter than the longest, they will be padded with the last value.
-            - diff: generate multiple power spectra with the given params, which should be passed as lists or np arrays. The length of the params lists must be 1 or 3, and a power spectrum will be generated varrying each of the parameters individually while holding the central column of values constant.
+            - diff: generate multiple power spectra with the given params, which should be passed as lists or np arrays. The length of the params lists must be 1 or 3, and a power spectrum will be generated varying each of the parameters individually while holding the central column of values constant.
         **kwargs
             Cosmological parameters to pass to the appropriate method
         

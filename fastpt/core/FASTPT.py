@@ -192,7 +192,7 @@ class FASTPT:
         # size of input array must be an even number
         if (k.size % 2 != 0):
             raise ValueError('Input array must contain an even number of elements.')
-        # can we just force the extrapolation to add an element if we need one more? how do we prevent the extrapolation from giving us an odd number of elements? is that hard coded into extrap? or just trim the lowest k value if there is an odd numebr and no extrapolation is requested.
+        # can we just force the extrapolation to add an element if we need one more? how do we prevent the extrapolation from giving us an odd number of elements? is that hard coded into extrap? or just trim the lowest k value if there is an odd number and no extrapolation is requested.
 
         if n_pad is None:
             n_pad = int(0.5 * len(k))
@@ -746,7 +746,7 @@ class FASTPT:
         result = self.cache.get("sig4", hash_key)
         if result is not None: return result
         Ps, _ = self.J_k_scalar(P, self.X_spt, -2, P_window=P_window, C_window=C_window)
-        # Quadraric bias Legendre components
+        # Quadratic bias Legendre components
         # See eg section B of Baldauf+ 2012 (arxiv: 1201.4827)
         # Note pre-factor convention is not standardized
         # Returns relevant correlations (including contraction factors),

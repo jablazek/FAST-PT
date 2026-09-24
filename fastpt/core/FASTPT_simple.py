@@ -8,7 +8,7 @@ r'''
 	J. E. McEwen (c) 2016
 	mcewen.24@osu.edu
 
-	The FASTPT class is the workhose of the FASTPT algorithm.
+	The FASTPT class is the workhorse of the FASTPT algorithm.
 	This class calculates integrals of the form
 	\int \frac{d^3q}{(2 \pi)^3} K(q,k-q) P(q) P(|k-q|)
 '''
@@ -263,7 +263,7 @@ class FASTPT:
 		return P22+P13
 
 	def P_bias(self,P,P_window=None,C_window=None):
-		# Quadraric bias Legendre components
+		# Quadratic bias Legendre components
 		# See eg section B of Baldauf+ 2012 (arxiv: 1201.4827)
 		# Note pre-factor convention is not standardized
 		# Returns relevant correlations (including Wick contraction factors),
