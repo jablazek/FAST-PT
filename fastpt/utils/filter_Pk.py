@@ -121,9 +121,9 @@ if __name__=="__main__":
 	P1=filter_highk(k,P0,1,5)
 	P2=filter_lowk(k,P0,.01,.05)
 
-	k,P1=EK.PK_orginal(P1)
-	k,P2=EK.PK_orginal(P2)
-	k,P0=EK.PK_orginal(P0)
+	k,P1=EK.PK_original(P1)
+	k,P2=EK.PK_original(P2)
+	k,P0=EK.PK_original(P0)
 
 	import matplotlib.pyplot as plt
 
