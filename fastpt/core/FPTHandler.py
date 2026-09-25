@@ -406,7 +406,7 @@ class FPTHandler:
             "s2sij" : "P_s2E", "s2dsij" : "P_s20E", "s2sij2" : "P_s2E2",
 
             "a0e0e": "P_0E0E", "a0b0b": "P_0B0B", "ae2e2": "P_E", "ab2b2": "P_B",
-            "a0e2": "P_A", "b0e2": "P_Btype2", "d0ee2": "P_DEE", "d0bb2": "P_dDBB",
+            "a0e2": "P_A", "b0e2": "P_Btype2", "d0ee2": "P_DEE", "d0bb2": "P_DBB",
             "tijdsij" : "P_0EtE", "tij2sij" : "P_E2tE", "tijtij" : "P_tEtE", "Pak2" : "P_der", #<< Sometimes der sometimes non fpt term?
 
         }
