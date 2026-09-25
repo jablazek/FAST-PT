@@ -30,7 +30,7 @@ def P_IA_13S2F2(k,P):
 	f_high = Z1_high(exp(-high_s))*exp(-high_s)
 	f_low = Z1_low(exp(-low_s))*exp(-low_s)
 
-	f=np.hstack((f_low,f_mid_low,-0.2381002916036672,f_mid_high,f_high))
+	f=np.hstack((f_low,f_mid_low,-5./21.,f_mid_high,f_high))
 
 
 	g= convolve(P, f) * dL
