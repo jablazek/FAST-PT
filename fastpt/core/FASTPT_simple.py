@@ -1,4 +1,4 @@
-'''
+r'''
 	FASTPT is a numerical algorithm to calculate
 	1-loop contributions to the matter power spectrum or other
 	similar type integrals.
@@ -8,7 +8,7 @@
 	J. E. McEwen (c) 2016
 	mcewen.24@osu.edu
 
-	The FASTPT class is the workhose of the FASTPT algorithm.
+	The FASTPT class is the workhorse of the FASTPT algorithm.
 	This class calculates integrals of the form
 	\int \frac{d^3q}{(2 \pi)^3} K(q,k-q) P(q) P(|k-q|)
 '''
@@ -55,7 +55,7 @@ class FASTPT:
 		self.high_extrap=high_extrap
 
 
-		self.k_old=k
+		self.k_extrap=k #K extrapolation not padded
 
 		delta_L=(log(np.max(k))-log(np.min(k)))/(k.size-1)
 
@@ -76,7 +76,7 @@ class FASTPT:
 			if (n_pad < n_pad_check):
 				print('Warning, you should consider increasing your zero padding to at least ', n_pad_check, ' .')
 				print('So, that you ensure that k > 2k_min.')
-				print(' k min in the FASTPT universe is ', k[0], ' while k min input is ', self.k_old[0])
+				print(' k min in the FASTPT universe is ', k[0], ' while k min after extrapolation is ', self.k_extrap[0])
 
 
 		if(n_pad == None):
@@ -176,7 +176,7 @@ class FASTPT:
 			P=self.EK.extrap_P_high(P)
 
 
-		P_b=P*self.k_old**(-self.nu)
+		P_b=P*self.k_extrap**(-self.nu)
 
 		if P_window is not None:
 		# window the input power spectrum, so that at high and low k
@@ -185,10 +185,10 @@ class FASTPT:
 
 			if (self.verbose):
 				print('windowing biased power spectrum')
-			W=p_window(self.k_old,P_window[0],P_window[1])
+			W=p_window(self.k_extrap,P_window[0],P_window[1])
 			P_b=P_b*W
 
-		if (self.n_pad !=0):
+		if (self.n_pad !=0 and self.n_pad is not None):
 			P_b=np.pad(P_b, pad_width=(self.n_pad,self.n_pad), mode='constant', constant_values=0)
 
 		c_m_positive=rfft(P_b)
@@ -255,7 +255,7 @@ class FASTPT:
 	def one_loop(self,P,P_window=None,C_window=None):
 
 		Ps,P22=self.P22(P,P_window,C_window)
-		P13=P_13_reg(self.k_old,Ps)
+		P13=P_13_reg(self.k_extrap,Ps)
 		if (self.extrap):
 			_,P=self.EK.PK_original(P22+P13)
 			return P
@@ -263,7 +263,7 @@ class FASTPT:
 		return P22+P13
 
 	def P_bias(self,P,P_window=None,C_window=None):
-		# Quadraric bias Legendre components
+		# Quadratic bias Legendre components
 		# See eg section B of Baldauf+ 2012 (arxiv: 1201.4827)
 		# Note pre-factor convention is not standardized
 		# Returns relevant correlations (including Wick contraction factors),
@@ -271,8 +271,8 @@ class FASTPT:
 		# Uses standard "full initialization" of J terms
 
 		Power, mat=self.J_k(P,P_window=P_window,C_window=C_window)
-		sig4=np.trapezoid(self.k_old**2*Power**2,x=self.k_old)/(2.*pi**2)
-		#sig2=np.trapezoid(self.k_old**2*Power,x=self.k_old)/(2.*pi**2)
+		sig4=np.trapezoid(self.k_extrap**3*Power**2,x=np.log(self.k_extrap))/(2.*pi**2)
+		#sig2=np.trapezoid(self.k_extrap**2*Power,x=self.k_extrap)/(2.*pi**2)
 
 		Pd1d2=2.*(17./21*mat[0,:]+mat[4,:]+4./21*mat[1,:])
 		Pd2d2=2.*(mat[0,:])

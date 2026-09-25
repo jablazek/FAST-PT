@@ -1,8 +1,8 @@
 '''
-* Module to calculate the matter power specturm in
-Standard Pertrubation Theory at one-loop.
+* Module to calculate the matter power spectrum in
+Standard Perturbation Theory at one-loop.
 * This module uses the routine J_k to calculate each Legendre
-component of the matter power spectrum kernals as given in the appendix of
+component of the matter power spectrum kernels as given in the appendix of
 XXX.
 
 Author: J. E. McEwen, 2015 & Xiao Fang
