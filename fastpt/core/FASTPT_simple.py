@@ -188,7 +188,9 @@ class FASTPT:
 			W=p_window(self.k_extrap,P_window[0],P_window[1])
 			P_b=P_b*W
 
-		if (self.n_pad !=0 and self.n_pad is not None):
+		if self.n_pad is None:
+			self.n_pad = 0
+		if self.n_pad != 0:
 			P_b=np.pad(P_b, pad_width=(self.n_pad,self.n_pad), mode='constant', constant_values=0)
 
 		c_m_positive=rfft(P_b)
