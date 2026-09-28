@@ -42,6 +42,9 @@ P_RSD_ABsum_mu = fpt.RSD_ABsum_mu(P, 1.0, 1.0, C_window=C_window)
 # IR resummation
 P_IRres = fpt.IRres(P, C_window=C_window)
 
+#EFT integrals
+EFT_integrals = fpt.eft_integrals(P, C_window=C_window)
+
 
 names = {
     'k': k,
@@ -60,6 +63,7 @@ names = {
     'P_IA_der': P_IA_der,
     'P_RSD': P_RSD,
     'P_RSD_ABsum_components': P_RSD_ABsum_components,
+    'EFT_integrals': EFT_integrals,
 }
 
 for name, arr in names.items():

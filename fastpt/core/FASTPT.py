@@ -40,7 +40,7 @@ from ..info import __version__
 import numpy as np
 from numpy import exp, log, cos, sin, pi
 from ..utils.fastpt_extr import p_window, c_window
-from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, J2_integral, J3_integral
+from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, J1_integral, J2_integral, J3_integral
 from ..utils.initialize_params import scalar_stuff, tensor_stuff
 from ..IA.IA_tt import IA_tt
 from ..IA.IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
@@ -323,20 +323,65 @@ class FASTPT:
             self.X_RSDA
             self.X_RSDB
 
-        if self.todo_dict['EFT']:
-            # TODO: I don't like that this is so big, maybe move these to the bottom and have one call here.
-            nu = -2
-            self.EFT_matrices = IA_EFT_mat()
-            self.Jabl_I11 = scalar_stuff(self.EFT_matrices[0], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I12 = scalar_stuff(self.EFT_matrices[1], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I13 = scalar_stuff(self.EFT_matrices[2], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I22 = scalar_stuff(self.EFT_matrices[3], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I23 = scalar_stuff(self.EFT_matrices[4], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I24 = scalar_stuff(self.EFT_matrices[5], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I33 = scalar_stuff(self.EFT_matrices[6], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I34 = scalar_stuff(self.EFT_matrices[7], nu, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I44 = scalar_stuff(self.EFT_matrices[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
-            self.Jabl_I55 = scalar_stuff(self.EFT_matrices[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+    @cached_property
+    def Jabl_I11(self):
+        result = scalar_stuff(IA_EFT_mat()[0], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I11'
+        return result
+
+    @cached_property
+    def Jabl_I12(self):
+        result = scalar_stuff(IA_EFT_mat()[1], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I12'
+        return result
+
+    @cached_property
+    def Jabl_I13(self):
+        result = scalar_stuff(IA_EFT_mat()[2], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I13'
+        return result
+
+    @cached_property
+    def Jabl_I22(self):
+        result = scalar_stuff(IA_EFT_mat()[3], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I22'
+        return result
+
+    @cached_property
+    def Jabl_I23(self):
+        result = scalar_stuff(IA_EFT_mat()[4], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I23'
+        return result
+
+    @cached_property
+    def Jabl_I24(self):
+        result = scalar_stuff(IA_EFT_mat()[5], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I24'
+        return result
+
+    @cached_property
+    def Jabl_I33(self):
+        result = scalar_stuff(IA_EFT_mat()[6], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I33'
+        return result
+
+    @cached_property
+    def Jabl_I34(self):
+        result = scalar_stuff(IA_EFT_mat()[7], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I34'
+        return result
+
+    @cached_property
+    def Jabl_I44(self):
+        result = scalar_stuff(IA_EFT_mat()[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I44'
+        return result
+
+    @cached_property
+    def Jabl_I55(self):
+        result = scalar_stuff(IA_EFT_mat()[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'Jabl_I55'
+        return result
         
     @property
     def k_original(self):
@@ -1033,7 +1078,7 @@ class FASTPT:
         P_0B0B = self.compute_term("P_0B0B", self.X_IA_0B0B, P=P, P_window=P_window, C_window=C_window)
         return P_deltaE1, P_deltaE2, P_0E0E, P_0B0B
 
-    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=False):
+    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True):
         # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
         # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
 
@@ -1046,18 +1091,34 @@ class FASTPT:
             P_mat = np.multiply(coef, np.transpose(mat))
             Inm = np.sum(P_mat, 1)
             return Inm, Ps
+ 
+ 
+        def lowk_limits(k, P):
+            """Analytic low-k limit arrays L_nm(k) for the base integrals.
+            Returns a dict keyed by integral name; each value is an array over k."""
+            A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
+            pi2 = np.pi**2
+            ones = np.ones_like(k)
+            return {
+                'I22':  A/(2*pi2) * ones,
+                'I23':  A/(2*pi2) * ones,
+                'I33':  A/(2*pi2) * ones,
+                'I44':  A / (15*pi2),
+                'I55':  A / (15*pi2),
+            }
+
 
         # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.Jabl_I11, -2, C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.Jabl_I12, -2, C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.Jabl_I13, -2, C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.Jabl_I22, -2, C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.Jabl_I23, -2, C_window)
-        I24, _ = get_Inm(P, IA_coef[5], self.Jabl_I24, -2, C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.Jabl_I33, -2, C_window)
-        I34, _ = get_Inm(P, IA_coef[7], self.Jabl_I34, -2, C_window)
-        I44, _ = get_Inm(P, IA_coef[8], self.Jabl_I44, -1.6, C_window)
-        I55, _ = get_Inm(P, IA_coef[9], self.Jabl_I55, -1.6, C_window)
+        I11, Ps = get_Inm(P, IA_coef[0], self.Jabl_I11, -2, P_window=P_window, C_window=C_window)
+        I12, _ = get_Inm(P, IA_coef[1], self.Jabl_I12, -2, P_window=P_window, C_window=C_window)
+        I13, _ = get_Inm(P, IA_coef[2], self.Jabl_I13, -2, P_window=P_window, C_window=C_window)
+        I22, _ = get_Inm(P, IA_coef[3], self.Jabl_I22, -2, P_window=P_window, C_window=C_window)
+        I23, _ = get_Inm(P, IA_coef[4], self.Jabl_I23, -2, P_window=P_window, C_window=C_window)
+        I24, _ = get_Inm(P, IA_coef[5], self.Jabl_I24, -2, P_window=P_window, C_window=C_window)
+        I33, _ = get_Inm(P, IA_coef[6], self.Jabl_I33, -2, P_window=P_window, C_window=C_window)
+        I34, _ = get_Inm(P, IA_coef[7], self.Jabl_I34, -2, P_window=P_window, C_window=C_window)
+        I44, _ = get_Inm(P, IA_coef[8], self.Jabl_I44, -1.6, P_window=P_window, C_window=C_window)
+        I55, _ = get_Inm(P, IA_coef[9], self.Jabl_I55, -1.6, P_window=P_window, C_window=C_window)
 
         I24 /= self.k_extrap ** 2
         I34 /= self.k_extrap ** 2
@@ -1066,17 +1127,20 @@ class FASTPT:
 
         # subtract the low-k limit of the integral:
         if remove_lowk:
-            # FIXME: Change this to the analytical expressions for the low-k limit once available.
-            print(
-                "Warning: Removing low-k from predictions based on initial k-value at this point.")
-            I22 -= I22[0]
-            I23 -= I23[0]
-            I24 -= I24[0]
-            I33 -= I33[0]
-            I44 -= I44[0]
-            I55 -= I55[0]
+            print("Removing low-k from predictions from analytical solution.")
+            L = lowk_limits(self.k_extrap, Ps)
+            I22 -= L['I22']
+            I23 -= L['I23']
+            I33 -= L['I33']
+            I44 -= L['I44'] 
+            I55 -= L['I55'] 
+            # I11, I12, I13: analytic limit is 0 -> nothing to subtract.
+            # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
+            # I14, I66, I67, I77: built from the A.2 relations below, so the subtraction propagates automatically.
+
 
         # Compute the (13)-integrals:
+        #J1 = J1_integral(self.k_extrap, Ps) #this is not regularized. keep J1 as P_13_reg / 2 for now
         J1 = P_13_reg(self.k_extrap, Ps) / 2
         J2 = J2_integral(self.k_extrap, Ps)
         J3 = J3_integral(self.k_extrap, Ps)
