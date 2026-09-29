@@ -612,7 +612,7 @@ class FASTPT:
             return hash(arrays.tobytes())
         return hash(arrays)
 
-    def _create_hash_key(self, term, X, P, P_window, C_window):
+    def _create_hash_key(self, term, X, P, P_window, C_window, **extras):
         """Create a hash key from the term and input parameters"""
         P_hash = self._hash_arrays(P)
         P_win_hash = self._hash_arrays(P_window)
@@ -621,7 +621,7 @@ class FASTPT:
         else:
             X_id = hash(self.X_registry.get(id(X), f"unknown_{id(X)}"))
         term_hash = hash(term) #Included for differentiating between similar param sets
-        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window)]
+        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window), hash(tuple(sorted(extras.items())))]
         hash_key = 0
         for h in hash_list:
             if h is not None:
@@ -1424,7 +1424,7 @@ class FASTPT:
 
     def J_k_scalar(self, P, X, nu, P_window=None, C_window=None):
         
-        hash_key, P_hash = self._create_hash_key("J_k_scalar", X, P, P_window, C_window)
+        hash_key, P_hash = self._create_hash_key("J_k_scalar", X, P, P_window, C_window, nu=nu)
         result = self.cache.get("J_k_scalar", hash_key)
         if result is not None: return result
 
@@ -1437,6 +1437,15 @@ class FASTPT:
             P = self.EK.extrap_P_high(P)
 
         P_b = P * self.k_extrap ** (-nu)
+        if (P_window is not None):
+            # window the input power spectrum, so that at high and low k
+            # the signal smoothly tappers to zero. This make the input
+            # more "like" a periodic signal
+
+            if (self.verbose):
+                print('windowing biased power spectrum')
+            W = p_window(self.k_extrap, P_window[0], P_window[1])
+            P_b = P_b * W
 
         if (self.n_pad > 0):
             P_b = np.pad(P_b, pad_width=(self.n_pad, self.n_pad), mode='constant', constant_values=0)
@@ -1537,8 +1546,7 @@ class FASTPT:
     def _cache_fourier_coefficients(self, P_b, C_window=None, scalar=False):
         """Cache and return Fourier coefficients for a given biased power spectrum"""
     
-        hash_key, P_hash = self._create_hash_key("fourier_coefficients", None, P_b, None, C_window)
-        hash_key = hash_key ^ (hash(scalar) + 0x9e3779b9 + (hash_key << 6) + (hash_key >> 2))
+        hash_key, P_hash = self._create_hash_key("fourier_coefficients", None, P_b, None, C_window, scalar=scalar)
         result = self.cache.get("fourier_coefficients", hash_key)
         if result is not None: 
             return result
