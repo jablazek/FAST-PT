@@ -652,24 +652,22 @@ class FASTPT:
         array_like
             The computed Fast-PT term
         """
-        if P is None: 
-            raise ValueError('Compute term requires an input power spectrum array.')        
+        if P is None:
+            raise ValueError('Compute term requires an input power spectrum array.')
 
         hash_key, P_hash = self._create_hash_key(term, X, P, P_window, C_window)
+
         result = self.cache.get(term, hash_key)
-        if result is not None: 
-            return result
+        if result is None:
+            result, _ = self.J_k_tensor(P, X, P_window=P_window, C_window=C_window)
+            result = self._apply_extrapolation(result)
+            self.cache.set(result, term, hash_key, P_hash)
 
-        result, _ = self.J_k_tensor(P, X, P_window=P_window, C_window=C_window)
-        result = self._apply_extrapolation(result)
+        # operation is applied after the cache, so the cached value is the raw term
+        return operation(result) if operation else result
 
-        if operation:
-            final_result = operation(result)
-            self.cache.set(final_result, term, hash_key, P_hash)
-            return final_result
 
-        self.cache.set(result, term, hash_key, P_hash)
-        return result
+
     
 
 
