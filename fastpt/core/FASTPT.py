@@ -158,8 +158,9 @@ class FASTPT:
         self.__k_original = k
         self.extrap = False
         if (low_extrap is not None or high_extrap is not None):
-            if (high_extrap < low_extrap):
+            if (low_extrap is not None and high_extrap is not None and high_extrap < low_extrap):
                 raise ValueError('high_extrap must be greater than low_extrap')
+
             self.EK = k_extend(k, low_extrap, high_extrap)
             k = self.EK.extrap_k()
             self.extrap = True
