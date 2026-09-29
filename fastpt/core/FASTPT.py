@@ -248,9 +248,10 @@ class FASTPT:
             'all': False, 'everything': False
         }
 
+
         if to_do: 
-            print("Warning: to_do list is no longer needed for FAST-PT initialization. Terms will now be calculated as needed. It may still be used to pre-compute matrices for faster initial runs.")
-        
+            if self.verbose:
+                 print("Warning: to_do list is no longer needed for FAST-PT initialization. Terms will now be calculated as needed. It may still be used to pre-compute matrices for faster initial runs.")
             for entry in to_do:
                 if entry in {'all', 'everything'}:
                     for key in self.todo_dict:
