@@ -29,11 +29,11 @@ def IA_tt():
 	tableE=np.zeros(10,dtype=float)
 	for i in range(l_mat_E.shape[0]):
 		xE=J_table(l_mat_E[i])
-		tableE=np.row_stack((tableE,xE))
+		tableE=np.vstack((tableE,xE))
 
 	tableB=np.zeros(10,dtype=float)
 	for i in range(l_mat_B.shape[0]):
 		xB=J_table(l_mat_B[i])
-		tableB=np.row_stack((tableB,xB))
+		tableB=np.vstack((tableB,xB))
 
 	return tableE[1:,:] , tableB[1:,:]
