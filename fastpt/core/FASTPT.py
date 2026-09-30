@@ -1218,7 +1218,7 @@ class FASTPT:
             P_OV : Ostriker-Vishniac effect power spectrum
         """
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
-        hash_key, P_hash = self._create_hash_key("OV", None, P, P_window, C_window)
+        hash_key, P_hash = self._create_hash_key("P_OV", None, P, P_window, C_window)
         result = self.cache.get("P_OV", hash_key)
         if result is not None: return result
         P, A = self.J_k_tensor(P, self.X_OV, P_window=P_window, C_window=C_window)
