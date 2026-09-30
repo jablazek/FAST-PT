@@ -1,7 +1,7 @@
-''' This file contains the routine to calculate
+r''' This file contains the routine to calculate
 	J_{\alpha, \beta, l}(k), as appears in 2.21 of the paper.
 
-	It is the orginal FAST-PT code and has now been replaced by
+	It is the original FAST-PT code and has now been replaced by
 	FASTPT.py.
 
 	J. E. McEwen (c) 2016

@@ -2,7 +2,7 @@ import numpy as np
 from ..utils.J_table import J_table 
 import sys
 
-# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 l_mat_E= np.array([[0,0,0,0,0,16./81],\
 		[0,0,2,0,0,713./1134],\
 		[0,0,4,0,0,38./315],\
