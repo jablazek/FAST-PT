@@ -223,3 +223,9 @@ def test_IRres(fpt):
     stored = load_benchmark('P_IRres_benchmark.txt')
     # calc_and_show(bmark, stored, "IRres")
     assert_benchmark(bmark, stored, "IRres")
+
+def test_eft_integrals(fpt):
+    bmark = np.transpose(fpt.eft_integrals(P, C_window=C_window))
+    stored = load_benchmark('EFT_integrals_benchmark.txt')
+    # calc_and_show(bmark, stored, "eft_integrals")
+    assert_benchmark(bmark, stored, "eft_integrals")

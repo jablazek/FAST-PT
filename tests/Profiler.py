@@ -75,6 +75,7 @@ def main():
         'RSD_ABsum_mu': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5, 'mu_n': 0.5},
         'J_k_scalar': {'P': P, 'X': fpt.X_spt, 'nu': -2, 'P_window': P_window, 'C_window': C_window},
         'J_k_tensor': {'P': P, 'X': fpt.X_IA_E, 'P_window': P_window, 'C_window': C_window},
+        'eft_integrals': {'P': P, 'P_window': P_window, 'C_window': C_window},
     }
     
     results = {}

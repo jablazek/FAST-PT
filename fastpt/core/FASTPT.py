@@ -1078,7 +1078,7 @@ class FASTPT:
         P_0B0B = self.compute_term("P_0B0B", self.X_IA_0B0B, P=P, P_window=P_window, C_window=C_window)
         return P_deltaE1, P_deltaE2, P_0E0E, P_0B0B
 
-    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True):
+    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
         # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
         # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
 
@@ -1140,10 +1140,18 @@ class FASTPT:
 
 
         # Compute the (13)-integrals:
-        #J1 = J1_integral(self.k_extrap, Ps) #this is not regularized. keep J1 as P_13_reg / 2 for now
         J1 = P_13_reg(self.k_extrap, Ps) / 2
         J2 = J2_integral(self.k_extrap, Ps)
         J3 = J3_integral(self.k_extrap, Ps)
+
+        if not regularize:
+            # I11 as returned is regularized (J_{2,-2,0} handled), matching
+            # P22_reg/2. Add back k^2 sigma_v^2 P_L / 2 so that 2*I11 = P22.
+            ke = self.k_extrap
+            Cint = np.trapezoid(Ps * ke, np.log(ke))      # INT P_L dq
+            I11 = I11 + ke**2 * Ps * Cint / (12 * np.pi**2)
+            J1  = J1_integral(self.k_extrap, Ps)
+
 
         _, I11 = self.EK.PK_original(I11)
         _, I12 = self.EK.PK_original(I12)
