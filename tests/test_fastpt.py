@@ -66,7 +66,7 @@ def test_init_padding(fpt):
                                    ['one_loop_cleft_dd'], ['IA_tt'], 
                                    ['IA_mix'], ['IA_ta'], ['OV'], 
                                    ['kPol'], ['RSD'], ['tij'], ['gb2'], 
-                                   ['IRres'], ['all'], ['everything']])
+                                   ['IRres'], ['all'], ['EFT'],['everything']])
 def test_all_todos(to_do):
     """Test initialization with all possible to_do options"""
     k = np.logspace(-3, 1, 200)
@@ -365,6 +365,34 @@ def test_IRres(fpt):
     result = fpt.IRres(P)
     assert isinstance(result, np.ndarray)
     assert result.shape == P.shape
+
+def test_eft_integrals(fpt):
+    """Test the eft_integrals function"""
+    result = fpt.eft_integrals(P)
+    assert isinstance(result, tuple)
+    assert len(result) == 17 
+    for term in result:
+        assert term.shape == P.shape
+
+@pytest.mark.parametrize("regularize", [True, False])
+def test_eft_density_matches_spt(fpt, regularize):
+    """2*(I11 + J1) reproduces the SPT one-loop in both regularization
+    conventions, since the counterterms cancel in the sum."""
+    from fastpt.utils.matter_power_spt import P_22, P_13_reg
+    k = np.loadtxt(data_path)[:, 0]
+    Ps, P22_reg = P_22(k, P, None, C_window, int(0.5 * len(k)))
+    ref = P22_reg + P_13_reg(k, Ps)
+    out = fpt.eft_integrals(P, C_window=C_window, regularize=regularize)
+    I11, J1 = out[0], out[14]
+
+    # Restrict to the interior: the power spectrum extrapolation and FFT window
+    # dominate at the edges of the k grid.
+    m = (k > 1e-3) & (k < 1e1)
+    ratio = 2 * (I11[I11.size and slice(None)][m] + J1[m]) / ref[m]
+    # The median is robust to the zero crossing of P22+P13 near k ~ 0.085,
+    # where a pure relative tolerance is meaningless.
+    assert abs(np.median(ratio) - 1.0) < 1e-3
+    assert np.percentile(np.abs(ratio - 1.0), 99) < 5e-2
 
 def test_hash_none(fpt):
     """Test hashing None values"""
