@@ -323,65 +323,18 @@ class FASTPT:
             self.X_RSDA
             self.X_RSDB
 
-    @cached_property
-    def Jabl_I11(self):
-        result = scalar_stuff(IA_EFT_mat()[0], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I11'
-        return result
+        if self.todo_dict['EFT']:
+            self.X_I11
+            self.X_I12
+            self.X_I13
+            self.X_I22
+            self.X_I23
+            self.X_I24
+            self.X_I33
+            self.X_I34
+            self.X_I44
+            self.X_I55
 
-    @cached_property
-    def Jabl_I12(self):
-        result = scalar_stuff(IA_EFT_mat()[1], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I12'
-        return result
-
-    @cached_property
-    def Jabl_I13(self):
-        result = scalar_stuff(IA_EFT_mat()[2], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I13'
-        return result
-
-    @cached_property
-    def Jabl_I22(self):
-        result = scalar_stuff(IA_EFT_mat()[3], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I22'
-        return result
-
-    @cached_property
-    def Jabl_I23(self):
-        result = scalar_stuff(IA_EFT_mat()[4], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I23'
-        return result
-
-    @cached_property
-    def Jabl_I24(self):
-        result = scalar_stuff(IA_EFT_mat()[5], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I24'
-        return result
-
-    @cached_property
-    def Jabl_I33(self):
-        result = scalar_stuff(IA_EFT_mat()[6], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I33'
-        return result
-
-    @cached_property
-    def Jabl_I34(self):
-        result = scalar_stuff(IA_EFT_mat()[7], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I34'
-        return result
-
-    @cached_property
-    def Jabl_I44(self):
-        result = scalar_stuff(IA_EFT_mat()[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I44'
-        return result
-
-    @cached_property
-    def Jabl_I55(self):
-        result = scalar_stuff(IA_EFT_mat()[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
-        self.X_registry[id(result)] = 'Jabl_I55'
-        return result
         
     @property
     def k_original(self):
@@ -611,6 +564,56 @@ class FASTPT:
         p_mat = tabB[:, [0, 1, 5, 6, 7, 8, 9]]
         result = tensor_stuff(p_mat, self.N, self.m, self.eta_m, self.l, self.tau_l)
         self.X_registry[id(result)] = 'X_RSDB'
+        return result
+    @cached_property
+    def X_I11(self):
+        result = scalar_stuff(IA_EFT_mat()[0], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I11'
+        return result
+    @cached_property
+    def X_I12(self):
+        result = scalar_stuff(IA_EFT_mat()[1], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I12'
+        return result
+    @cached_property
+    def X_I13(self):
+        result = scalar_stuff(IA_EFT_mat()[2], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I13'
+        return result
+    @cached_property
+    def X_I22(self):
+        result = scalar_stuff(IA_EFT_mat()[3], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I22'
+        return result
+    @cached_property
+    def X_I23(self):
+        result = scalar_stuff(IA_EFT_mat()[4], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I23'
+        return result
+    @cached_property
+    def X_I24(self):
+        result = scalar_stuff(IA_EFT_mat()[5], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I24'
+        return result
+    @cached_property
+    def X_I33(self):
+        result = scalar_stuff(IA_EFT_mat()[6], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I33'
+        return result
+    @cached_property
+    def X_I34(self):
+        result = scalar_stuff(IA_EFT_mat()[7], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I34'
+        return result
+    @cached_property
+    def X_I44(self):
+        result = scalar_stuff(IA_EFT_mat()[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I44'
+        return result
+    @cached_property
+    def X_I55(self):
+        result = scalar_stuff(IA_EFT_mat()[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I55'
         return result
 
 
@@ -1082,6 +1085,13 @@ class FASTPT:
         # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
         # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
 
+        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+
+        term = f"eft_integrals_lowk{int(remove_lowk)}_reg{int(regularize)}"
+        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
+        result = self.cache.get(term, hash_key)
+        if result is not None: return result
+
         # Coefficients for the (22)-type integrals:
         IA_coef = IA_EFT_coef()
 
@@ -1109,16 +1119,16 @@ class FASTPT:
 
 
         # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.Jabl_I11, -2, P_window=P_window, C_window=C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.Jabl_I12, -2, P_window=P_window, C_window=C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.Jabl_I13, -2, P_window=P_window, C_window=C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.Jabl_I22, -2, P_window=P_window, C_window=C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.Jabl_I23, -2, P_window=P_window, C_window=C_window)
-        I24, _ = get_Inm(P, IA_coef[5], self.Jabl_I24, -2, P_window=P_window, C_window=C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.Jabl_I33, -2, P_window=P_window, C_window=C_window)
-        I34, _ = get_Inm(P, IA_coef[7], self.Jabl_I34, -2, P_window=P_window, C_window=C_window)
-        I44, _ = get_Inm(P, IA_coef[8], self.Jabl_I44, -1.6, P_window=P_window, C_window=C_window)
-        I55, _ = get_Inm(P, IA_coef[9], self.Jabl_I55, -1.6, P_window=P_window, C_window=C_window)
+        I11, Ps = get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
+        I12, _ = get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
+        I13, _ = get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
+        I22, _ = get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
+        I23, _ = get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
+        I24, _ = get_Inm(P, IA_coef[5], self.X_I24, -2, P_window=P_window, C_window=C_window)
+        I33, _ = get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
+        I34, _ = get_Inm(P, IA_coef[7], self.X_I34, -2, P_window=P_window, C_window=C_window)
+        I44, _ = get_Inm(P, IA_coef[8], self.X_I44, -1.6, P_window=P_window, C_window=C_window)
+        I55, _ = get_Inm(P, IA_coef[9], self.X_I55, -1.6, P_window=P_window, C_window=C_window)
 
         I24 /= self.k_extrap ** 2
         I34 /= self.k_extrap ** 2
@@ -1152,27 +1162,19 @@ class FASTPT:
             I11 = I11 + ke**2 * Ps * Cint / (12 * np.pi**2)
             J1  = J1_integral(self.k_extrap, Ps)
 
-
-        _, I11 = self.EK.PK_original(I11)
-        _, I12 = self.EK.PK_original(I12)
-        _, I13 = self.EK.PK_original(I13)
-        _, I22 = self.EK.PK_original(I22)
-        _, I23 = self.EK.PK_original(I23)
-        _, I24 = self.EK.PK_original(I24)
-        _, I33 = self.EK.PK_original(I33)
-        _, I34 = self.EK.PK_original(I34)
-        _, I44 = self.EK.PK_original(I44)
-        _, I55 = self.EK.PK_original(I55)
-        _, J1 = self.EK.PK_original(J1)
-        _, J2 = self.EK.PK_original(J2)
-        _, J3 = self.EK.PK_original(J3)
+        (I11, I12, I13, I22, I23, I24, I33, I34,
+         I44, I55, J1, J2, J3) = self._apply_extrapolation(
+            I11, I12, I13, I22, I23, I24, I33, I34, I44, I55, J1, J2, J3)
 
         I14 = ((28 * I12 - I22 + I23) / 2 / np.sqrt(6) - 5 * I24 + 5 * I34) / 7
         I66 = I22 / 9 - np.sqrt(6) / 9 * I24 + I44 / 6
         I67 = I22 / 36 + I23 / 12 - 5 * np.sqrt(6) / 72 * I24 - np.sqrt(6) / 24 * I34 + I44 / 6
         I77 = I22 / 144 + I23 / 24 + I33 / 16 - np.sqrt(6) * I24 / 36 - np.sqrt(6) * I34 / 12 + I44 / 6
 
-        return I11, I12, I13, I14, I22, I23, I24, I33, I34, I44, I55, I66, I67, I77, J1, J2, J3
+        result = (I11, I12, I13, I14, I22, I23, I24, I33, I34,
+                  I44, I55, I66, I67, I77, J1, J2, J3)
+        self.cache.set(result, term, hash_key, P_hash)
+        return result
 
     def _get_P_deltaE2(self, P):
         hash_key, P_hash = self._create_hash_key("P_deltaE2", None, P, None, None)
