@@ -51,6 +51,29 @@ def test_init_extrapolation_ranges():
     with pytest.raises(ValueError):
         FASTPT(k, low_extrap=3, high_extrap=-5)  # Invalid range
 
+@pytest.mark.parametrize("low_extrap, high_extrap", [(-5, None), (None, 3)])
+def test_init_one_sided_extrapolation(low_extrap, high_extrap):
+    """Only one extrapolation bound: init succeeds and outputs match the input k grid"""
+    k = np.loadtxt(data_path)[:, 0]
+    fpt = FASTPT(k, low_extrap=low_extrap, high_extrap=high_extrap)
+
+    assert fpt.extrap
+    assert fpt.low_extrap == low_extrap
+    assert fpt.high_extrap == high_extrap
+
+    extended_k = fpt.k_extrap
+    if low_extrap is not None:
+        assert extended_k[0] < k[0]
+        np.testing.assert_allclose(extended_k[-1], k[-1])
+    else:
+        assert extended_k[-1] > k[-1]
+        np.testing.assert_allclose(extended_k[0], k[0])
+
+    P_1loop, Ps = fpt.one_loop_dd(P, C_window=C_window)
+    assert P_1loop.shape == k.shape
+    assert Ps.shape == k.shape
+
+
 def test_init_padding(fpt):
     """Test initialization with different padding values"""
     k = np.logspace(-3, 1, 200)
