@@ -389,6 +389,67 @@ def test_IRres(fpt):
     assert isinstance(result, np.ndarray)
     assert result.shape == P.shape
 
+def _fresh_fpt():
+    """A new FASTPT with the same setup as the fpt fixture, so its cache is empty"""
+    k = np.loadtxt(data_path)[:, 0]
+    return FASTPT(k, low_extrap=-5, high_extrap=3, n_pad=int(0.5 * len(k)))
+
+
+def test_J_k_scalar_cache_separates_nu(fpt):
+    """A cached J_k_scalar result for one nu must not be returned for another nu"""
+    fpt.J_k_scalar(P, fpt.X_spt, -2)  # fills the cache with nu = -2
+    P_out_cached, A_out_cached = fpt.J_k_scalar(P, fpt.X_spt, -1)
+
+    fresh = _fresh_fpt()
+    P_out_fresh, A_out_fresh = fresh.J_k_scalar(P, fresh.X_spt, -1)
+
+    np.testing.assert_allclose(P_out_cached, P_out_fresh)
+    np.testing.assert_allclose(A_out_cached, A_out_fresh)
+
+
+def test_J_k_scalar_applies_and_caches_P_window(fpt):
+    """P_window changes the J_k_scalar result and is not mixed up with the unwindowed cache entry"""
+    P_window = np.array([0.2, 0.2])
+    P_out_plain, _ = fpt.J_k_scalar(P, fpt.X_spt, -2)
+    P_out_windowed, A_out_windowed = fpt.J_k_scalar(P, fpt.X_spt, -2, P_window=P_window)
+
+    fresh = _fresh_fpt()
+    P_out_fresh, A_out_fresh = fresh.J_k_scalar(P, fresh.X_spt, -2, P_window=P_window)
+
+    # if the window were ignored, the two results would be identical
+    assert not np.allclose(P_out_windowed, P_out_plain)
+    np.testing.assert_allclose(P_out_windowed, P_out_fresh)
+    np.testing.assert_allclose(A_out_windowed, A_out_fresh)
+
+
+def test_compute_term_applies_operation_after_cache(fpt):
+    """compute_term caches the raw term, so each call applies its own operation"""
+    double = lambda x: 2 * x
+    doubled_first = fpt.compute_term("P_d2E2", fpt.X_IA_gb2_he, operation=double, P=P)
+    raw = fpt.compute_term("P_d2E2", fpt.X_IA_gb2_he, P=P)
+    doubled_again = fpt.compute_term("P_d2E2", fpt.X_IA_gb2_he, operation=double, P=P)
+
+    fresh = _fresh_fpt()
+    raw_fresh = fresh.compute_term("P_d2E2", fresh.X_IA_gb2_he, P=P)
+
+    np.testing.assert_allclose(doubled_first, 2 * raw_fresh)
+    np.testing.assert_allclose(raw, raw_fresh)
+    np.testing.assert_allclose(doubled_again, 2 * raw_fresh)
+
+
+def test_OV_repeated_call_hits_cache(fpt):
+    """A second identical OV call returns the cached array without recomputing"""
+    first = fpt.OV(P)
+    hits_before = fpt.cache.hits
+    misses_before = fpt.cache.misses
+
+    second = fpt.OV(P)
+
+    assert second is first
+    assert fpt.cache.hits == hits_before + 1
+    assert fpt.cache.misses == misses_before
+
+
 def test_hash_none(fpt):
     """Test hashing None values"""
     result = fpt._hash_arrays(None)
