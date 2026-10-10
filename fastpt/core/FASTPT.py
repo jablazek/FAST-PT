@@ -1440,7 +1440,7 @@ class FASTPT:
         P_b = P * self.k_extrap ** (-nu)
         if (P_window is not None):
             # window the input power spectrum, so that at high and low k
-            # the signal smoothly tappers to zero. This make the input
+            # the signal smoothly tapers to zero. This makes the input
             # more "like" a periodic signal
 
             if (self.verbose):
