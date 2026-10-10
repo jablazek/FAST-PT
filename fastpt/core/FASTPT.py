@@ -623,7 +623,8 @@ class FASTPT:
         else:
             X_id = hash(self.X_registry.get(id(X), f"unknown_{id(X)}"))
         term_hash = hash(term) #Included for differentiating between similar param sets
-        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window), hash(tuple(sorted(extras.items())))]
+        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window), hash(repr(sorted(extras.items())))]
+
         hash_key = 0
         for h in hash_list:
             if h is not None:
