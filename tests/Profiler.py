@@ -33,9 +33,9 @@ def numpy_to_python(obj):
     if isinstance(obj, (np.int_, np.intc, np.intp, np.int8, np.int16, 
         np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64)):
         return int(obj)
-    if isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+    if isinstance(obj, (np.float16, np.float32, np.float64)):
         return float(obj)
-    if isinstance(obj, (np.complex_, np.complex64, np.complex128)):
+    if isinstance(obj, (np.complex64, np.complex128)):
         return {'real': obj.real, 'imag': obj.imag}
     if isinstance(obj, dict):
         return {k: numpy_to_python(v) for k, v in obj.items()}
@@ -64,10 +64,10 @@ def main():
         'IA_ta': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'IA_der': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'IA_ct': {'P': P, 'P_window': P_window, 'C_window': C_window},
-        'IA_ctbias': {'P': P, 'P_window': P_window, 'C_window': C_window},
-        'IA_gb2': {'P': P, 'P_window': P_window, 'C_window': C_window},
-        'IA_d2': {'P': P, 'P_window': P_window, 'C_window': C_window},
-        'IA_s2': {'P': P, 'P_window': P_window, 'C_window': C_window},
+        'gI_ta': {'P': P, 'P_window': P_window, 'C_window': C_window},
+        'gI_tt': {'P': P, 'P_window': P_window, 'C_window': C_window},
+        'gI_ct': {'P': P, 'P_window': P_window, 'C_window': C_window},
+        'IRres': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'OV': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'kPol': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'RSD_components': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5},
@@ -76,7 +76,11 @@ def main():
         'J_k_scalar': {'P': P, 'X': fpt.X_spt, 'nu': -2, 'P_window': P_window, 'C_window': C_window},
         'J_k_tensor': {'P': P, 'X': fpt.X_IA_E, 'P_window': P_window, 'C_window': C_window},
     }
-    
+
+    missing = [f for f in function_params if not hasattr(fpt, f)]
+    if missing:
+        raise AttributeError(f"Profiler lists non-existent FASTPT methods: {missing}")
+ 
     results = {}
 
         

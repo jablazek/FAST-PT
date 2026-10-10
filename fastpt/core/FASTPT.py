@@ -1,4 +1,4 @@
-'''
+r'''
 	FASTPT is a numerical algorithm to calculate
 	1-loop contributions to the matter power spectrum
 	and other integrals of a similar type.
@@ -158,8 +158,9 @@ class FASTPT:
         self.__k_original = k
         self.extrap = False
         if (low_extrap is not None or high_extrap is not None):
-            if (high_extrap < low_extrap):
+            if (low_extrap is not None and high_extrap is not None and high_extrap < low_extrap):
                 raise ValueError('high_extrap must be greater than low_extrap')
+
             self.EK = k_extend(k, low_extrap, high_extrap)
             k = self.EK.extrap_k()
             self.extrap = True
@@ -192,7 +193,7 @@ class FASTPT:
         # size of input array must be an even number
         if (k.size % 2 != 0):
             raise ValueError('Input array must contain an even number of elements.')
-        # can we just force the extrapolation to add an element if we need one more? how do we prevent the extrapolation from giving us an odd number of elements? is that hard coded into extrap? or just trim the lowest k value if there is an odd numebr and no extrapolation is requested.
+        # can we just force the extrapolation to add an element if we need one more? how do we prevent the extrapolation from giving us an odd number of elements? is that hard coded into extrap? or just trim the lowest k value if there is an odd number and no extrapolation is requested.
 
         if n_pad is None:
             n_pad = int(0.5 * len(k))
@@ -218,7 +219,7 @@ class FASTPT:
                 print('*** Warning ***')
                 print(f'You should consider increasing your zero padding to at least {n_pad_check}')
                 print('to ensure that the minimum k_output is > 2k_min in the FASTPT universe.')
-                print(f'k_min in the FASTPT universe is {k[0]} while k_min_input is {self.k_extrap[0]}')
+                print(f'k_min in the FASTPT universe is {k[0]} while k_min after extrapolation is {self.k_extrap[0]}')
 
         self.__k_final = k #log spaced k, with padding and extrap
         self.k_size = k.size
@@ -247,9 +248,10 @@ class FASTPT:
             'all': False, 'everything': False
         }
 
+
         if to_do: 
-            print("Warning: to_do list is no longer needed for FAST-PT initialization. Terms will now be calculated as needed. It may still be used to pre-compute matrices for faster initial runs.")
-        
+            if self.verbose:
+                print("Warning: to_do list is no longer needed for FAST-PT initialization. Terms will now be calculated as needed. It may still be used to pre-compute matrices for faster initial runs.")
             for entry in to_do:
                 if entry in {'all', 'everything'}:
                     for key in self.todo_dict:
@@ -612,7 +614,7 @@ class FASTPT:
             return hash(arrays.tobytes())
         return hash(arrays)
 
-    def _create_hash_key(self, term, X, P, P_window, C_window):
+    def _create_hash_key(self, term, X, P, P_window, C_window, **extras):
         """Create a hash key from the term and input parameters"""
         P_hash = self._hash_arrays(P)
         P_win_hash = self._hash_arrays(P_window)
@@ -621,7 +623,8 @@ class FASTPT:
         else:
             X_id = hash(self.X_registry.get(id(X), f"unknown_{id(X)}"))
         term_hash = hash(term) #Included for differentiating between similar param sets
-        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window)]
+        hash_list = [term_hash, X_id, P_hash, P_win_hash, hash(C_window), hash(repr(sorted(extras.items())))]
+
         hash_key = 0
         for h in hash_list:
             if h is not None:
@@ -652,24 +655,22 @@ class FASTPT:
         array_like
             The computed Fast-PT term
         """
-        if P is None: 
-            raise ValueError('Compute term requires an input power spectrum array.')        
+        if P is None:
+            raise ValueError('Compute term requires an input power spectrum array.')
 
         hash_key, P_hash = self._create_hash_key(term, X, P, P_window, C_window)
+
         result = self.cache.get(term, hash_key)
-        if result is not None: 
-            return result
+        if result is None:
+            result, _ = self.J_k_tensor(P, X, P_window=P_window, C_window=C_window)
+            result = self._apply_extrapolation(result)
+            self.cache.set(result, term, hash_key, P_hash)
 
-        result, _ = self.J_k_tensor(P, X, P_window=P_window, C_window=C_window)
-        result = self._apply_extrapolation(result)
+        # operation is applied after the cache, so the cached value is the raw term
+        return operation(result) if operation else result
 
-        if operation:
-            final_result = operation(result)
-            self.cache.set(final_result, term, hash_key, P_hash)
-            return final_result
 
-        self.cache.set(result, term, hash_key, P_hash)
-        return result
+
     
 
 
@@ -746,7 +747,7 @@ class FASTPT:
         result = self.cache.get("sig4", hash_key)
         if result is not None: return result
         Ps, _ = self.J_k_scalar(P, self.X_spt, -2, P_window=P_window, C_window=C_window)
-        # Quadraric bias Legendre components
+        # Quadratic bias Legendre components
         # See eg section B of Baldauf+ 2012 (arxiv: 1201.4827)
         # Note pre-factor convention is not standardized
         # Returns relevant correlations (including contraction factors),
@@ -1218,7 +1219,7 @@ class FASTPT:
             P_OV : Ostriker-Vishniac effect power spectrum
         """
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
-        hash_key, P_hash = self._create_hash_key("OV", None, P, P_window, C_window)
+        hash_key, P_hash = self._create_hash_key("P_OV", None, P, P_window, C_window)
         result = self.cache.get("P_OV", hash_key)
         if result is not None: return result
         P, A = self.J_k_tensor(P, self.X_OV, P_window=P_window, C_window=C_window)
@@ -1424,7 +1425,7 @@ class FASTPT:
 
     def J_k_scalar(self, P, X, nu, P_window=None, C_window=None):
         
-        hash_key, P_hash = self._create_hash_key("J_k_scalar", X, P, P_window, C_window)
+        hash_key, P_hash = self._create_hash_key("J_k_scalar", X, P, P_window, C_window, nu=nu)
         result = self.cache.get("J_k_scalar", hash_key)
         if result is not None: return result
 
@@ -1437,6 +1438,15 @@ class FASTPT:
             P = self.EK.extrap_P_high(P)
 
         P_b = P * self.k_extrap ** (-nu)
+        if (P_window is not None):
+            # window the input power spectrum, so that at high and low k
+            # the signal smoothly tapers to zero. This makes the input
+            # more "like" a periodic signal
+
+            if (self.verbose):
+                print('windowing biased power spectrum')
+            W = p_window(self.k_extrap, P_window[0], P_window[1])
+            P_b = P_b * W
 
         if (self.n_pad > 0):
             P_b = np.pad(P_b, pad_width=(self.n_pad, self.n_pad), mode='constant', constant_values=0)
@@ -1537,8 +1547,7 @@ class FASTPT:
     def _cache_fourier_coefficients(self, P_b, C_window=None, scalar=False):
         """Cache and return Fourier coefficients for a given biased power spectrum"""
     
-        hash_key, P_hash = self._create_hash_key("fourier_coefficients", None, P_b, None, C_window)
-        hash_key = hash_key ^ (hash(scalar) + 0x9e3779b9 + (hash_key << 6) + (hash_key >> 2))
+        hash_key, P_hash = self._create_hash_key("fourier_coefficients", None, P_b, None, C_window, scalar=scalar)
         result = self.cache.get("fourier_coefficients", hash_key)
         if result is not None: 
             return result
