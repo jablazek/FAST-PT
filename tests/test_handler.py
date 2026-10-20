@@ -1295,3 +1295,7 @@ def test_class_camb_parameter_consistency(handler):
     k_idx_range = slice(len(handler.fastpt.k_original) // 10, -len(handler.fastpt.k_original) // 10)
     ratio = class_result[k_idx_range] / camb_result[k_idx_range]
     assert 0.998 < np.median(ratio) < 1.002, "CLASS and CAMB results differ significantly"
+
+@pytest.mark.parametrize("tracer", ["pgg", "pgi", "pgm", "pii", "pim", "pmm"])
+def test_get_tracer(handler, tracer):
+    assert handler.get_tracer(tracer)

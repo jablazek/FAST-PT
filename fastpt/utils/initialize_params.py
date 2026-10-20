@@ -1,7 +1,7 @@
 '''
 	This is the file that we keep all our functions that only
 	depend on the k-grid. These routines are used to set up the initialization
-	quatities for each FAST-PT parameter matrix.
+	quantities for each FAST-PT parameter matrix.
 '''
 import numpy as np
 from numpy import exp, pi, log, sqrt

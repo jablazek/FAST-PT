@@ -1,7 +1,7 @@
 ''' Wigner symbols.
 	J.E. McEwen 2016
 
-	Algorithm based on the sympy implimentation of sympy.physics.wigner,
+	Algorithm based on the sympy implementation of sympy.physics.wigner,
 	which was based off of:
 
 		[Rasch03] J. Rasch and A. C. H. Yu, 'Efficient Storage Scheme for
@@ -10,8 +10,8 @@
 
 	Additional routines have been added for special configurations of Wigner 3 j symbols
 
-	The code has not be written in a way to handle large input values; beware of precission issues
-	associated with large values aquired from factorials.
+	The code has not been written in a way to handle large input values; beware of precision issues
+	associated with large values acquired from factorials.
 '''
 
 import numpy as np

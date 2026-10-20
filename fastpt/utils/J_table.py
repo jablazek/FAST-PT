@@ -1,4 +1,4 @@
-''' This module tranforms a
+''' This module transforms a
     set of l_1, l_2, and l in a
     set of J_1, J_2, and J_k.
 
