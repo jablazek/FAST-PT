@@ -1082,8 +1082,9 @@ class FASTPT:
         P22G_mat = np.multiply(one_loop_coefG, np.transpose(matG))
         P_22G = np.sum(P22G_mat, 1)
         P_22F, P_22G = self._apply_extrapolation(P_22F, P_22G)
-        P_13G = P_IA_13G(self.k_original,P,)
-        P_13F = P_IA_13F(self.k_original, P)
+        # P_13 on the same extrapolated grid and round-trip spectrum as P_22 (as in _get_P_1loop)
+        P_13G = self._apply_extrapolation(P_IA_13G(self.k_extrap, Ps))
+        P_13F = self._apply_extrapolation(P_IA_13F(self.k_extrap, Ps))
         P_0tE = P_22G-P_22F+P_13G-P_13F
         P_0tE = 2*P_0tE
         self.cache.set(P_0tE, "P_0tE", hash_key, P_hash)
