@@ -383,7 +383,7 @@ def test_eft_density_matches_spt(fpt, regularize):
     Ps, P22_reg = P_22(k, P, None, C_window, int(0.5 * len(k)))
     ref = P22_reg + P_13_reg(k, Ps)
     out = fpt.eft_integrals(P, C_window=C_window, regularize=regularize)
-    I11, J1 = out[0], out[14]
+    I11, J1 = out[0], out[6]
 
     # Restrict to the interior: the power spectrum extrapolation and FFT window
     # dominate at the edges of the k grid.

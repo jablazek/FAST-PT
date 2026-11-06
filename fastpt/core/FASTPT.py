@@ -1091,109 +1091,58 @@ class FASTPT:
         return P_deltaE1, P_deltaE2, P_0E0E, P_0B0B
 
     def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
-        # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
-        # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
+        """
+        Computes the full set of EFT integrals (arXiv:2303.15565).
 
-        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3,
+             I44, I55, I66, I67, I77)
+        """
+        
+        # If someone calls this function, return everything from eft_22
+        return self.eft_22(P, P_window=P_window, C_window=C_window,
+                           remove_lowk=remove_lowk, regularize=regularize)
 
-        term = f"eft_integrals_lowk{int(remove_lowk)}_reg{int(regularize)}"
-        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
-        result = self.cache.get(term, hash_key)
-        if result is not None: return result
+    def _get_Inm(self, P, coef, Jabl, nu, P_window=None, C_window=None):
+        # Function to compute the final (22)-integrals:
+        Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+        P_mat = np.multiply(coef, np.transpose(mat))
+        Inm = np.sum(P_mat, 1)
+        return Inm, Ps
 
-        # Coefficients for the (22)-type integrals:
-        IA_coef = IA_EFT_coef()
+    def _get_Inm_tensor(self, P, coef, Jabl, P_window=None, C_window=None):
+        # Function to compute the unregularized I11:
+        Ps, mat = self.J_k_tensor(P, Jabl, P_window, C_window)
+        P_mat = np.multiply(coef, np.transpose(mat))
+        Inm = np.sum(P_mat, 1)
+        return Inm, Ps
 
-        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
-            # Function to compute the final (22)-integrals:
-            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
-
-        def get_Inm_tensor(P, coef, Jabl, P_window=P_window, C_window=C_window):
-            # Function to compute the unregularized I11:
-            Ps, mat = self.J_k_tensor(P, Jabl, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
- 
-        def lowk_limits(k, P):
-            """Analytic low-k limit arrays L_nm(k) for the base integrals.
-            Returns a dict keyed by integral name; each value is an array over k."""
-            A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
-            pi2 = np.pi**2
-            ones = np.ones_like(k)
-            return {
-                'I22':  A/(2*pi2) * ones,
-                'I23':  A/(2*pi2) * ones,
-                'I33':  A/(2*pi2) * ones,
-                'I44':  A / (15*pi2),
-                'I55':  A / (15*pi2),
-            }
-
-
-        # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
-        I24, _ = get_Inm(P, IA_coef[5], self.X_I24, -2, P_window=P_window, C_window=C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
-        I34, _ = get_Inm(P, IA_coef[7], self.X_I34, -2, P_window=P_window, C_window=C_window)
-        I44, _ = get_Inm(P, IA_coef[8], self.X_I44, -1.6, P_window=P_window, C_window=C_window)
-        I55, _ = get_Inm(P, IA_coef[9], self.X_I55, -1.6, P_window=P_window, C_window=C_window)
-
-        I24 /= self.k_extrap ** 2
-        I34 /= self.k_extrap ** 2
-        I44 /= self.k_extrap ** 4
-        I55 /= self.k_extrap ** 4
-
-        # subtract the low-k limit of the integral:
-        if remove_lowk:
-            print("Removing low-k from predictions from analytical solution.")
-            L = lowk_limits(self.k_extrap, Ps)
-            I22 -= L['I22']
-            I23 -= L['I23']
-            I33 -= L['I33']
-            I44 -= L['I44'] 
-            I55 -= L['I55'] 
-            # I11, I12, I13: analytic limit is 0 -> nothing to subtract.
-            # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
-            # I14, I66, I67, I77: built from the A.2 relations below, so the subtraction propagates automatically.
-
-
-        # Compute the (13)-integrals:
-        J1 = P_13_reg(self.k_extrap, Ps) / 2
-        J2 = J2_integral(self.k_extrap, Ps)
-        J3 = J3_integral(self.k_extrap, Ps)
-
-        if not regularize:
-            print("WARNING: the unregularized version of I11 requires a higher n_padding for numerical convergence. Suggested value: n_padding=5*len(k).")
-            I11, _ = get_Inm_tensor(P, IA_coef[0], self.X_I11_tensor, P_window=P_window, C_window=C_window)
-            J1  = J1_integral(self.k_extrap, Ps)
-
-        (I11, I12, I13, I22, I23, I24, I33, I34,
-         I44, I55, J1, J2, J3) = self._apply_extrapolation(
-            I11, I12, I13, I22, I23, I24, I33, I34, I44, I55, J1, J2, J3)
-
-        I14 = ((28 * I12 - I22 + I23) / 2 / np.sqrt(6) - 5 * I24 + 5 * I34) / 7
-        I66 = I22 / 9 - np.sqrt(6) / 9 * I24 + I44 / 6
-        I67 = I22 / 36 + I23 / 12 - 5 * np.sqrt(6) / 72 * I24 - np.sqrt(6) / 24 * I34 + I44 / 6
-        I77 = I22 / 144 + I23 / 24 + I33 / 16 - np.sqrt(6) * I24 / 36 - np.sqrt(6) * I34 / 12 + I44 / 6
-
-        result = (I11, I12, I13, I14, I22, I23, I24, I33, I34,
-                  I44, I55, I66, I67, I77, J1, J2, J3)
-        self.cache.set(result, term, hash_key, P_hash)
-        return result
-
-    #NOTE: make 2 new functions for eft_integrals. one just for the galaxy bias terms, and one for the IA terms. 
-    # first one doesnt need a lot of I terms + only J1 and J2
+    def _lowk_limits(self, k, P):
+        """Analytic low-k limit arrays L_nm(k) for the base integrals.
+        Returns a dict keyed by integral name; each value is an array over k."""
+        A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
+        pi2 = np.pi**2
+        ones = np.ones_like(k)
+        return {
+            'I22':  A/(2*pi2) * ones,
+            'I23':  A/(2*pi2) * ones,
+            'I33':  A/(2*pi2) * ones,
+            'I44':  A / (15*pi2),
+            'I55':  A / (15*pi2),
+        }
 
     def eft_00(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
-        # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
-        # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
+        """
+        Computes the simplest tier of EFT integrals (arXiv:2303.15565).
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2)
+        """
 
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
 
@@ -1202,77 +1151,48 @@ class FASTPT:
         result = self.cache.get(term, hash_key)
         if result is not None: return result
 
-        # Coefficients for the (22)-type integrals:
         IA_coef = IA_EFT_coef()
 
-        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
-            # Function to compute the final (22)-integrals:
-            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
+        I11, Ps = self._get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
+        I12, _ = self._get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
+        I13, _ = self._get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
+        I22, _ = self._get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
+        I23, _ = self._get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
+        I33, _ = self._get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
 
-        def get_Inm_tensor(P, coef, Jabl, P_window=P_window, C_window=C_window):
-            # Function to compute the unregularized I11:
-            Ps, mat = self.J_k_tensor(P, Jabl, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
- 
-        def lowk_limits(k, P):
-            """Analytic low-k limit arrays L_nm(k) for the base integrals.
-            Returns a dict keyed by integral name; each value is an array over k."""
-            A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
-            pi2 = np.pi**2
-            ones = np.ones_like(k)
-            return {
-                'I22':  A/(2*pi2) * ones,
-                'I23':  A/(2*pi2) * ones,
-                'I33':  A/(2*pi2) * ones,
-            }
-
-
-        # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
-
-        # subtract the low-k limit of the integral:
         if remove_lowk:
             print("Removing low-k from predictions from analytical solution.")
-            L = lowk_limits(self.k_extrap, Ps)
+            L = self._lowk_limits(self.k_extrap, Ps)
             I22 -= L['I22']
             I23 -= L['I23']
             I33 -= L['I33']
             # I11, I12, I13: analytic limit is 0 -> nothing to subtract.
-            # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
-            # I14, I66, I67, I77: built from the A.2 relations below, so the subtraction propagates automatically.
 
-
-        # Compute the (13)-integrals:
         J1 = P_13_reg(self.k_extrap, Ps) / 2
         J2 = J2_integral(self.k_extrap, Ps)
 
         if not regularize:
-            print("WARNING: the unregularized version of I11 requires a higher n_padding for numerical convergence. Suggested value: n_padding=5*len(k).")
-            I11, _ = get_Inm_tensor(P, IA_coef[0], self.X_I11_tensor, P_window=P_window, C_window=C_window)
-            J1  = J1_integral(self.k_extrap, Ps)
+            print("WARNING: the unregularized version of I11 requires a higher n_padding for numerical convergence. Recommend increasing n_padding if necessary.")
+            I11, _ = self._get_Inm_tensor(P, IA_coef[0], self.X_I11_tensor, P_window=P_window, C_window=C_window)
+            J1 = J1_integral(self.k_extrap, Ps)
 
         (I11, I12, I13, I22, I23, I33, J1, J2) = self._apply_extrapolation(
             I11, I12, I13, I22, I23, I33, J1, J2)
 
-
-        result = (I11, I12, I13, I22, I23, I33,
-                  J1, J2)
+        result = (I11, I12, I13, I22, I23, I33, J1, J2)
         self.cache.set(result, term, hash_key, P_hash)
         return result
 
     def eft_02(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
-        # Returns the I_nm, J_n integrals based on arXiv:2303.15565. See Eqs. (2.39), (2.40) and
-        # corresponding kernels in Eqs. (A.1)-(A.3). Power spectra can be obtained using (2.41) and (2.63).
+        """
+        Computes the middle tier of EFT integrals (arXiv:2303.15565).
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3)
+        """
 
         self._validate_params(P=P, P_window=P_window, C_window=C_window)
 
@@ -1281,81 +1201,78 @@ class FASTPT:
         result = self.cache.get(term, hash_key)
         if result is not None: return result
 
-        # Coefficients for the (22)-type integrals:
+        (I11, I12, I13, I22, I23, I33, J1, J2) = self.eft_00(
+            P, P_window=P_window, C_window=C_window, remove_lowk=remove_lowk, regularize=regularize)
+
         IA_coef = IA_EFT_coef()
 
-        def get_Inm(P, coef, Jabl, nu, P_window=P_window, C_window=C_window):
-            # Function to compute the final (22)-integrals:
-            Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
+        Ps, _ = self.J_k_scalar(P, self.X_I11, -2, P_window=P_window, C_window=C_window)
 
-        def get_Inm_tensor(P, coef, Jabl, P_window=P_window, C_window=C_window):
-            # Function to compute the unregularized I11:
-            Ps, mat = self.J_k_tensor(P, Jabl, P_window, C_window)
-            P_mat = np.multiply(coef, np.transpose(mat))
-            Inm = np.sum(P_mat, 1)
-            return Inm, Ps
- 
-        def lowk_limits(k, P):
-            """Analytic low-k limit arrays L_nm(k) for the base integrals.
-            Returns a dict keyed by integral name; each value is an array over k."""
-            A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
-            pi2 = np.pi**2
-            ones = np.ones_like(k)
-            return {
-                'I22':  A/(2*pi2) * ones,
-                'I23':  A/(2*pi2) * ones,
-                'I33':  A/(2*pi2) * ones,
-                'I44':  A / (15*pi2),
-                'I55':  A / (15*pi2),
-            }
-
-
-        # Compute the (22)-integrals
-        I11, Ps = get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
-        I12, _ = get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
-        I13, _ = get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
-        I22, _ = get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
-        I23, _ = get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
-        I24, _ = get_Inm(P, IA_coef[5], self.X_I24, -2, P_window=P_window, C_window=C_window)
-        I33, _ = get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
-        I34, _ = get_Inm(P, IA_coef[7], self.X_I34, -2, P_window=P_window, C_window=C_window)
+        I24, _ = self._get_Inm(P, IA_coef[5], self.X_I24, -2, P_window=P_window, C_window=C_window)
+        I34, _ = self._get_Inm(P, IA_coef[7], self.X_I34, -2, P_window=P_window, C_window=C_window)
 
         I24 /= self.k_extrap ** 2
         I34 /= self.k_extrap ** 2
+        # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
 
-        # subtract the low-k limit of the integral:
-        if remove_lowk:
-            print("Removing low-k from predictions from analytical solution.")
-            L = lowk_limits(self.k_extrap, Ps)
-            I22 -= L['I22']
-            I23 -= L['I23']
-            I33 -= L['I33']
-            # I11, I12, I13: analytic limit is 0 -> nothing to subtract.
-            # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
-            # I14, I66, I67, I77: built from the A.2 relations below, so the subtraction propagates automatically.
-
-
-        # Compute the (13)-integrals:
-        J1 = P_13_reg(self.k_extrap, Ps) / 2
-        J2 = J2_integral(self.k_extrap, Ps)
         J3 = J3_integral(self.k_extrap, Ps)
 
-        if not regularize:
-            print("WARNING: the unregularized version of I11 requires a higher n_padding for numerical convergence. Suggested value: n_padding=5*len(k).")
-            I11, _ = get_Inm_tensor(P, IA_coef[0], self.X_I11_tensor, P_window=P_window, C_window=C_window)
-            J1  = J1_integral(self.k_extrap, Ps)
-
-        (I11, I12, I13, I22, I23, I24, I33, I34,
-         J1, J2, J3) = self._apply_extrapolation(
-            I11, I12, I13, I22, I23, I24, I33, I34, J1, J2, J3)
+        (I24, I34, J3) = self._apply_extrapolation(I24, I34, J3)
 
         I14 = ((28 * I12 - I22 + I23) / 2 / np.sqrt(6) - 5 * I24 + 5 * I34) / 7
 
-        result = (I11, I12, I13, I14, I22, I23, I24, I33, I34,
-                  J1, J2, J3)
+        result = (I11, I12, I13, I22, I23, I33, J1, J2,
+                  I14, I24, I34, J3)
+        self.cache.set(result, term, hash_key, P_hash)
+        return result
+
+    def eft_22(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
+        """
+        Computes the most complex tier of EFT integrals (arXiv:2303.15565).
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3,
+             I44, I55, I66, I67, I77)
+        """
+
+        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+
+        term = f"eft_22_lowk{int(remove_lowk)}_reg{int(regularize)}"
+        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
+        result = self.cache.get(term, hash_key)
+        if result is not None: return result
+
+        (I11, I12, I13, I22, I23, I33, J1, J2,
+         I14, I24, I34, J3) = self.eft_02(
+            P, P_window=P_window, C_window=C_window, remove_lowk=remove_lowk, regularize=regularize)
+
+        IA_coef = IA_EFT_coef()
+
+        Ps, _ = self.J_k_scalar(P, self.X_I11, -2, P_window=P_window, C_window=C_window)
+
+        I44, _ = self._get_Inm(P, IA_coef[8], self.X_I44, -1.6, P_window=P_window, C_window=C_window)
+        I55, _ = self._get_Inm(P, IA_coef[9], self.X_I55, -1.6, P_window=P_window, C_window=C_window)
+
+        I44 /= self.k_extrap ** 4
+        I55 /= self.k_extrap ** 4
+
+        if remove_lowk:
+            L = self._lowk_limits(self.k_extrap, Ps)
+            I44 -= L['I44']
+            I55 -= L['I55']
+
+        (I44, I55) = self._apply_extrapolation(I44, I55)
+
+        I66 = I22 / 9 - np.sqrt(6) / 9 * I24 + I44 / 6
+        I67 = I22 / 36 + I23 / 12 - 5 * np.sqrt(6) / 72 * I24 - np.sqrt(6) / 24 * I34 + I44 / 6
+        I77 = I22 / 144 + I23 / 24 + I33 / 16 - np.sqrt(6) * I24 / 36 - np.sqrt(6) * I34 / 12 + I44 / 6
+
+        result = (I11, I12, I13, I22, I23, I33, J1, J2,
+                  I14, I24, I34, J3,
+                  I44, I55, I66, I67, I77)
         self.cache.set(result, term, hash_key, P_hash)
         return result
 
