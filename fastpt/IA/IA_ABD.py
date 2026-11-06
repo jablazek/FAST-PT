@@ -53,7 +53,7 @@ def P_IA_B(k,P):
 
 
 def IA_A():
-	# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+	# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 	l_mat_IAA= np.array([[0,0,0,0,0,-31./210],\
           [0,0,2,0,0,-34./63],\
           [0,0,0,0,2,-47./147],\

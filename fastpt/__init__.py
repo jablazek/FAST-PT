@@ -1,4 +1,4 @@
-'''
+r'''
 	FASTPT is a numerical algorithm to calculate
 	1-loop contributions to the matter power spectrum
 	and other integrals of a similar type.

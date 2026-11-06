@@ -30,7 +30,7 @@ def P_IA_13S2F2(k,P):
 	f_high = Z1_high(exp(-high_s))*exp(-high_s)
 	f_low = Z1_low(exp(-low_s))*exp(-low_s)
 
-	f=np.hstack((f_low,f_mid_low,-0.2381002916036672,f_mid_high,f_high))
+	f=np.hstack((f_low,f_mid_low,-5./21.,f_mid_high,f_high))
 
 
 	g= convolve(P, f) * dL
@@ -40,7 +40,7 @@ def P_IA_13S2F2(k,P):
 
 
 def IA_gb2_fe():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_fe=np.array([[0,0,2,0,0,1]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_fe.shape[0]):
@@ -50,12 +50,12 @@ def IA_gb2_fe():
 
 
 def IA_gb2_he():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_he=np.array([[0,0,0,0,0,-1/6],\
             [0,0,2,0,0,-1/3],\
             [0,0,0,0,2,-1/3],\
             [0,0,1,1,1,3/2],\
-            [0,0,2,0,0,-1/3]],dtype=float)
+            [0,0,0,2,0,-1/3]],dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_he.shape[0]):
         x=J_table(l_mat_gb2_he[i])
@@ -63,7 +63,7 @@ def IA_gb2_he():
     return table[1:,:]
 
 def IA_gb2_F2():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_F2=np.array([[0,0,0,0,0,17/21],\
             [0,0,0,0,2,4/21],\
             [1,-1,0,0,1,1/2],\
@@ -75,7 +75,7 @@ def IA_gb2_F2():
     return table[1:,:]
 
 def IA_gb2_G2():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_G2=np.array([[0,0,0,0,0,13/21],\
             [0,0,0,0,2,8/21],\
             [1,-1,0,0,1,1/2],\
@@ -87,7 +87,7 @@ def IA_gb2_G2():
     return table[1:,:]
 
 def IA_gb2_S2F2():
-     # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+     # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2F2=np.array([[0,0,0,0,0,8/315],\
             [0,0,0,0,2,254/441],\
             [0,0,0,0,4,16/245],\
@@ -102,14 +102,14 @@ def IA_gb2_S2F2():
     return table[1:,:]
 
 def IA_gb2_S2G2():
-     # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+     # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2G2=np.array([[0,0,0,0,0,16/315],\
             [0,0,0,0,2,214/441],\
             [0,0,0,0,4,32/245],\
             [1,-1,0,0,1,2/15],\
             [1,-1,0,0,3,1/5],\
             [-1,1,0,0,1,2/15],\
-            [-1,1,0,0,1,1/5]],dtype=float)
+            [-1,1,0,0,3,1/5]],dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_S2G2.shape[0]):
         x=J_table(l_mat_gb2_S2G2[i])
@@ -117,7 +117,7 @@ def IA_gb2_S2G2():
     return table[1:,:]
 
 def IA_gb2_S2fe():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2fe=np.array([[0,0,2,0,2,2/3]], dtype=float)
     table=np.zeros(10,dtype=float)
     for i in range(l_mat_gb2_S2fe.shape[0]):
@@ -126,7 +126,7 @@ def IA_gb2_S2fe():
     return table[1:,:]
 
 def IA_gb2_S2he():
-    # Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+    # Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
     l_mat_gb2_S2he=np.array([[0,0,0,0,0,-2/45],\
             [0,0,0,0,2,-11/63],\
             [0,0,2,0,2,-2/9],\
