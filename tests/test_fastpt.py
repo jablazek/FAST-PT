@@ -374,12 +374,15 @@ def test_eft_integrals(fpt):
     for term in result:
         assert term.shape == P.shape
 
-@pytest.mark.parametrize("regularize", [True, False])
-def test_eft_density_matches_spt(fpt, regularize):
+@pytest.mark.parametrize("regularize, pad_factor", [(True, 0.5), (False, 5)])
+def test_eft_density_matches_spt(regularize, pad_factor):
     """2*(I11 + J1) reproduces the SPT one-loop in both regularization
-    conventions, since the counterterms cancel in the sum."""
+    conventions, since the counterterms cancel in the sum. The unregularized
+    I11 comes from the tensor path, which needs much more zero padding."""
     from fastpt.utils.matter_power_spt import P_22, P_13_reg
     k = np.loadtxt(data_path)[:, 0]
+    fpt = FASTPT(k, low_extrap=-5, high_extrap=3, n_pad=int(pad_factor * len(k)))
+
     Ps, P22_reg = P_22(k, P, None, C_window, int(0.5 * len(k)))
     ref = P22_reg + P_13_reg(k, Ps)
     out = fpt.eft_integrals(P, C_window=C_window, regularize=regularize)
@@ -388,7 +391,7 @@ def test_eft_density_matches_spt(fpt, regularize):
     # Restrict to the interior: the power spectrum extrapolation and FFT window
     # dominate at the edges of the k grid.
     m = (k > 1e-3) & (k < 1e1)
-    ratio = 2 * (I11[I11.size and slice(None)][m] + J1[m]) / ref[m]
+    ratio = 2 * (I11[m] + J1[m]) / ref[m]
     # The median is robust to the zero crossing of P22+P13 near k ~ 0.085,
     # where a pure relative tolerance is meaningless.
     assert abs(np.median(ratio) - 1.0) < 1e-3
