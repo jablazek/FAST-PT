@@ -2,7 +2,7 @@ import numpy as np
 from .J_table import J_table 
 import sys
 
-# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 l_mat= np.array([[-2,0,0,0,0,2./3],\
           [-2,0,0,2,0,-2./3],\
           [0,-2,0,0,0,-2./3],\

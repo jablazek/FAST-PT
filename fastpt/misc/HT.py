@@ -1,8 +1,8 @@
-''' 
-    python version of FFTLOG by Andrew Hamilton. I am it calling LOG Hankel Transfrom
-    This version of the fast Hankle transform is due to 
+r'''
+    python version of FFTLOG by Andrew Hamilton. I am calling it the LOG Hankel Transform
+    This version of the fast Hankel transform is due to 
     Andrew Hamilton (see http://casa.colorado.edu/~ajsh/FFTLog/). 
-    The orgrinal algorithm is due to Talman (1978). 
+    The original algorithm is due to Talman (1978). 
     
 	Joseph E. McEwen 
 	McEwen Laboratories (c) 2016 
@@ -10,14 +10,14 @@
 	
 	Please let Joseph E. McEwen aware of any bugs or errors in this code. 
 	
-	This code is available for anyone to use, but please give approriate reference to 
+	This code is available for anyone to use, but please give appropriate reference to
 	Joseph E. McEwen and the authors of the algorithm. 
 	
 	The Hankel transform in this code is defined as : 
 	F(k)= \int_0^\infty f(r) (kr)^q J_\mu(kr) k dr 
 	f(r)= \int_0^\infty F(k) (kr)^{-q} J_\mu(kr) r dk . 
 	
-	Beaware of different definitions, for instance Wikipedia uses the 
+	Be aware of different definitions, for instance Wikipedia uses the
 	following definitions: 
 	F(k)=\int_0^\infty f(r)  J_\mu(kr) r dr
 	f(r)= \int_0^\infty F(k)  J_\mu(kr) k dk . 

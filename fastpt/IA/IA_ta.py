@@ -39,7 +39,7 @@ def P_IA_deltaE2(k,P):
 
 
 def IA_deltaE1():
-	# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+	# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 	l_mat_deltaE1= np.array([[0,0,0,2,0,17./21],\
           [0,0,0,2,2,4./21],\
           [1,-1,0,2,1,1./2],\
@@ -53,7 +53,7 @@ def IA_deltaE1():
 
 
 def IA_0E0E():
-	# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+	# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 	l_mat_0E0E= np.array([[0,0,0,0,0,29./90],\
           [0,0,2,0,0,5./63],\
           [0,0,2,2,0,19./18],\
@@ -66,7 +66,7 @@ def IA_0E0E():
 
 
 def IA_0B0B():
-	# Ordering is \alpha, \beta, l_1, l_2, l, A coeficient
+	# Ordering is \alpha, \beta, l_1, l_2, l, A coefficient
 	l_mat_0B0B= np.array([[0,0,0,0,0,2./45],\
           [0,0,2,0,0,-44./63],\
           [0,0,2,2,0,-8./9],\
