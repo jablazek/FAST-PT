@@ -153,9 +153,8 @@ def one_loop(k,P,P_window=None,C_window=None,n_pad=None):
 	return P1,P22_reg,P13_reg
 
 
-#NOTE: this is not regularized. it should be. For now, leave J1 as P13_reg / 2
 def J1_integral(k, P):
-	# calculates the J_1 integral in the EFT of IA
+	# calculates the unregularized J_1 integral in the EFT of IA
 	# via a discrete convolution integral (kernel K_1^J, Eq. A.3)
 
 	N = k.size
