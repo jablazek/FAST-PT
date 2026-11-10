@@ -1093,7 +1093,7 @@ class FASTPT:
 
     def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
         """
-        Computes the full set of EFT integrals (arXiv:2303.15565).
+        Computes all one-loop EFT integrals of arXiv:2303.15565. Identical to eft_22.
 
         Returns
         -------
@@ -1124,20 +1124,20 @@ class FASTPT:
     def _lowk_limits(self, k, P):
         """Analytic low-k limit arrays L_nm(k) for the base integrals.
         Returns a dict keyed by integral name; each value is an array over k."""
-        A = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
+        sig4 = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
         pi2 = np.pi**2
-        ones = np.ones_like(k)
         return {
-            'I22':  A/(2*pi2) * ones,
-            'I23':  A/(2*pi2) * ones,
-            'I33':  A/(2*pi2) * ones,
-            'I44':  A / (15*pi2),
-            'I55':  A / (15*pi2),
+            'I22':  sig4/(2*pi2),
+            'I23':  sig4/(2*pi2),
+            'I33':  sig4/(2*pi2),
+            'I44':  sig4 / (15*pi2),
+            'I55':  sig4 / (15*pi2),
         }
 
     def eft_00(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
         """
-        Computes the simplest tier of EFT integrals (arXiv:2303.15565).
+        Computes the one-loop EFT integrals for the density-density
+        power spectrum (arXiv:2303.15565).
 
         Returns
         -------
@@ -1186,7 +1186,8 @@ class FASTPT:
 
     def eft_02(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
         """
-        Computes the middle tier of EFT integrals (arXiv:2303.15565).
+        Computes the one-loop EFT integrals for the density-shape cross-spectrum: 
+        the density-density integrals of eft_00 plus the cross terms I14, I24, I34 and J3.
 
         Returns
         -------
@@ -1229,7 +1230,8 @@ class FASTPT:
 
     def eft_22(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
         """
-        Computes the most complex tier of EFT integrals (arXiv:2303.15565).
+        Computes the one-loop EFT integrals for the shape-shape power spectrum (arXiv:2303.15565):
+        the integrals of eft_02 plus I44, I55, I66, I67, I77.
 
         Returns
         -------

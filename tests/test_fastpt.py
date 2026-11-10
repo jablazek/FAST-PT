@@ -412,13 +412,14 @@ def test_eft_density_matches_spt(regularize, pad_factor):
     I11, J1 = out[0], out[6]
 
     # Restrict to the interior: the power spectrum extrapolation and FFT window
-    # dominate at the edges of the k grid.
-    m = (k > 1e-3) & (k < 1e1)
+    # dominate at the edges of the k grid. Also skip the zero crossing of P22+P13
+    m = (k > 1e-3) & (k < 1e1) & ~((k > 8e-2) & (k < 9e-2))
     ratio = 2 * (I11[m] + J1[m]) / ref[m]
     # The median is robust to the zero crossing of P22+P13 near k ~ 0.085,
     # where a pure relative tolerance is meaningless.
     assert abs(np.median(ratio) - 1.0) < 1e-3
     assert np.percentile(np.abs(ratio - 1.0), 99) < 5e-2
+
 def _fresh_fpt():
     """A new FASTPT with the same setup as the fpt fixture, so its cache is empty"""
     k = np.loadtxt(data_path)[:, 0]
