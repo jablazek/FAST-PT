@@ -89,7 +89,7 @@ def test_init_padding(fpt):
                                    ['one_loop_cleft_dd'], ['IA_tt'], 
                                    ['IA_mix'], ['IA_ta'], ['OV'], 
                                    ['kPol'], ['RSD'], ['tij'], ['gb2'], 
-                                   ['IRres'], ['all'], ['everything']])
+                                   ['IRres'], ['all'], ['EFT'],['everything']])
 def test_all_todos(to_do):
     """Test initialization with all possible to_do options"""
     k = np.logspace(-3, 1, 200)
@@ -388,6 +388,37 @@ def test_IRres(fpt):
     result = fpt.IRres(P)
     assert isinstance(result, np.ndarray)
     assert result.shape == P.shape
+
+def test_eft_integrals(fpt):
+    """Test the eft_integrals function"""
+    result = fpt.eft_integrals(P)
+    assert isinstance(result, tuple)
+    assert len(result) == 17 
+    for term in result:
+        assert term.shape == P.shape
+
+@pytest.mark.parametrize("regularize, pad_factor", [(True, 0.5), (False, 5)])
+def test_eft_density_matches_spt(regularize, pad_factor):
+    """2*(I11 + J1) reproduces the SPT one-loop in both regularization
+    conventions, since the counterterms cancel in the sum. The unregularized
+    I11 comes from the tensor path, which needs much more zero padding."""
+    from fastpt.utils.matter_power_spt import P_22, P_13_reg
+    k = np.loadtxt(data_path)[:, 0]
+    fpt = FASTPT(k, low_extrap=-5, high_extrap=3, n_pad=int(pad_factor * len(k)))
+
+    Ps, P22_reg = P_22(k, P, None, C_window, int(0.5 * len(k)))
+    ref = P22_reg + P_13_reg(k, Ps)
+    out = fpt.eft_integrals(P, C_window=C_window, regularize=regularize)
+    I11, J1 = out[0], out[6]
+
+    # Restrict to the interior: the power spectrum extrapolation and FFT window
+    # dominate at the edges of the k grid. Also skip the zero crossing of P22+P13
+    m = (k > 1e-3) & (k < 1e1) & ~((k > 8e-2) & (k < 9e-2))
+    ratio = 2 * (I11[m] + J1[m]) / ref[m]
+    # The median is robust to the zero crossing of P22+P13 near k ~ 0.085,
+    # where a pure relative tolerance is meaningless.
+    assert abs(np.median(ratio) - 1.0) < 1e-3
+    assert np.percentile(np.abs(ratio - 1.0), 99) < 5e-2
 
 def _fresh_fpt():
     """A new FASTPT with the same setup as the fpt fixture, so its cache is empty"""

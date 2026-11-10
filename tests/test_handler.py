@@ -93,7 +93,7 @@ def test_all_fastpt_functions_with_handler_params(fpt):
         'one_loop_dd_bias_lpt_NL', 'IA_tt', 'IA_mix', 'IA_ta',
         'IA_der', 'IA_ct', 'gI_ct', 'gI_ta',
         'gI_tt', 'OV', 'kPol', 'RSD_components', 'IRres',
-        'RSD_ABsum_components', 'RSD_ABsum_mu',
+        'RSD_ABsum_components', 'RSD_ABsum_mu', 'eft_integrals'
     )
     
     for name in func_names:
@@ -127,7 +127,8 @@ def test_all_fastpt_functions_with_run_params(fpt):
         'kPol': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'RSD_components': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5},
         'RSD_ABsum_components': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5},
-        'RSD_ABsum_mu': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5, 'mu_n': 0.5}
+        'RSD_ABsum_mu': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5, 'mu_n': 0.5},
+        'eft_integrals': {'P': P, 'P_window': P_window, 'C_window': C_window}
     }
     
     for func_name, params in function_params.items():
@@ -190,7 +191,8 @@ def test_handler_function_equality(fpt):
         'kPol': {'P': P, 'P_window': P_window, 'C_window': C_window},
         'RSD_components': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5},
         'RSD_ABsum_components': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5},
-        'RSD_ABsum_mu': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5, 'mu_n': 0.5}
+        'RSD_ABsum_mu': {'P': P, 'P_window': P_window, 'C_window': C_window, 'f': 0.5, 'mu_n': 0.5},
+        'eft_integrals': {'P': P, 'P_window': P_window, 'C_window': C_window}
     }
     
     for func_name, params in function_params.items():
@@ -325,6 +327,7 @@ def test_get_all_terms(fpt, handler, term_name):
             # "ABsum": ("RSD_ABsum_components", 0),
 
             # "P_IRres": ("IRres", 0),
+            #"P_eft_integrals": ("eft_integrals", 0),
         }
     term_source = term_sources[term_name]
     result = handler.get(term_name)

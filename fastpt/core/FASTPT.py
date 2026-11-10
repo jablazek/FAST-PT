@@ -40,7 +40,7 @@ from ..info import __version__
 import numpy as np
 from numpy import exp, log, cos, sin, pi
 from ..utils.fastpt_extr import p_window, c_window
-from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL
+from ..utils.matter_power_spt import P_13_reg, Y1_reg_NL, Y2_reg_NL, J1_integral, J2_integral, J3_integral
 from ..utils.initialize_params import scalar_stuff, tensor_stuff
 from ..IA.IA_tt import IA_tt
 from ..IA.IA_ABD import IA_A, IA_DEE, IA_DBB, P_IA_B
@@ -49,8 +49,10 @@ from ..IA.IA_gb2 import IA_gb2_F2, IA_gb2_fe, IA_gb2_he, P_IA_13S2F2
 from ..IA.IA_gb2 import IA_gb2_S2F2, IA_gb2_S2fe, IA_gb2_S2he
 from ..IA.IA_ct import IA_tij_feG2, IA_tij_heG2, IA_tij_F2F2, IA_tij_G2G2, IA_tij_F2G2, P_IA_13G, P_IA_13F, IA_tij_F2G2reg
 from ..IA.IA_ctbias import IA_gb2_F2, IA_gb2_G2, IA_gb2_S2F2, IA_gb2_S2G2
+from ..IA.IA_EFT import IA_EFT_mat, IA_EFT_coef
 from ..utils.OV import OV
 from ..utils.kPol import kPol
+from ..utils.J_table import J_table
 from ..rsd.RSD import RSDA, RSDB
 from ..rsd.RSD_ItypeII import P_Ap1 as RSD_P_Ap1, P_Ap3 as RSD_P_Ap3, P_Ap5 as RSD_P_Ap5
 from ..utils.P_extend import k_extend
@@ -245,7 +247,8 @@ class FASTPT:
             'IA_mix': False, 'OV': False, 'kPol': False,
             'RSD': False, 'IRres': False, 
             'tij': False, 'gb2': False, 
-            'all': False, 'everything': False
+            'all': False, 'everything': False,
+            'EFT': False
         }
 
 
@@ -259,6 +262,8 @@ class FASTPT:
                 elif entry in {'IA_all', 'IA'}:
                     for key in ['IA_tt', 'IA_ta', 'IA_mix', 'gb2', 'tij']:
                         self.todo_dict[key] = True
+                elif entry == 'EFT':
+                    self.todo_dict['EFT'] = True
                 elif entry == 'dd_bias':
                     self.todo_dict['one_loop_dd'] = True
                     self.todo_dict['dd_bias'] = True
@@ -320,6 +325,20 @@ class FASTPT:
         if self.todo_dict['RSD']:
             self.X_RSDA
             self.X_RSDB
+
+        if self.todo_dict['EFT']:
+            self.X_I11
+            self.X_I12
+            self.X_I13
+            self.X_I22
+            self.X_I23
+            self.X_I24
+            self.X_I33
+            self.X_I34
+            self.X_I44
+            self.X_I55
+            self.X_I11_tensor
+
         
     @property
     def k_original(self):
@@ -549,6 +568,63 @@ class FASTPT:
         p_mat = tabB[:, [0, 1, 5, 6, 7, 8, 9]]
         result = tensor_stuff(p_mat, self.N, self.m, self.eta_m, self.l, self.tau_l)
         self.X_registry[id(result)] = 'X_RSDB'
+        return result
+    @cached_property
+    def X_I11(self):
+        result = scalar_stuff(IA_EFT_mat()[0], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I11'
+        return result
+    @cached_property
+    def X_I12(self):
+        result = scalar_stuff(IA_EFT_mat()[1], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I12'
+        return result
+    @cached_property
+    def X_I13(self):
+        result = scalar_stuff(IA_EFT_mat()[2], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I13'
+        return result
+    @cached_property
+    def X_I22(self):
+        result = scalar_stuff(IA_EFT_mat()[3], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I22'
+        return result
+    @cached_property
+    def X_I23(self):
+        result = scalar_stuff(IA_EFT_mat()[4], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I23'
+        return result
+    @cached_property
+    def X_I24(self):
+        result = scalar_stuff(IA_EFT_mat()[5], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I24'
+        return result
+    @cached_property
+    def X_I33(self):
+        result = scalar_stuff(IA_EFT_mat()[6], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I33'
+        return result
+    @cached_property
+    def X_I34(self):
+        result = scalar_stuff(IA_EFT_mat()[7], -2, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I34'
+        return result
+    @cached_property
+    def X_I44(self):
+        result = scalar_stuff(IA_EFT_mat()[8], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I44'
+        return result
+    @cached_property
+    def X_I55(self):
+        result = scalar_stuff(IA_EFT_mat()[9], -1.6, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I55'
+        return result
+    @cached_property
+    def X_I11_tensor(self):
+        rows = [J_table(row) for row in IA_EFT_mat()[10]]
+        p_mat = np.vstack(rows).astype(float)[:, [0, 1, 5, 6, 7, 8, 9]]
+        result = tensor_stuff(p_mat, self.N, self.m, self.eta_m, self.l, self.tau_l)
+        self.X_registry[id(result)] = 'X_I11_tensor'
         return result
 
 
@@ -1014,7 +1090,195 @@ class FASTPT:
         P_0E0E = self.compute_term("P_0E0E", self.X_IA_0E0E, P=P, P_window=P_window, C_window=C_window)
         P_0B0B = self.compute_term("P_0B0B", self.X_IA_0B0B, P=P, P_window=P_window, C_window=C_window)
         return P_deltaE1, P_deltaE2, P_0E0E, P_0B0B
-    
+
+    def eft_integrals(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
+        """
+        Computes all one-loop EFT integrals of arXiv:2303.15565. Identical to eft_22.
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3,
+             I44, I55, I66, I67, I77)
+        """
+        
+        # If someone calls this function, return everything from eft_22
+        return self.eft_22(P, P_window=P_window, C_window=C_window,
+                           remove_lowk=remove_lowk, regularize=regularize)
+
+    def _get_Inm(self, P, coef, Jabl, nu, P_window=None, C_window=None):
+        # Function to compute the final (22)-integrals:
+        Ps, mat = self.J_k_scalar(P, Jabl, nu, P_window, C_window)
+        P_mat = np.multiply(coef, np.transpose(mat))
+        Inm = np.sum(P_mat, 1)
+        return Inm, Ps
+
+    def _get_Inm_tensor(self, P, coef, Jabl, P_window=None, C_window=None):
+        # Function to compute the unregularized I11:
+        Ps, mat = self.J_k_tensor(P, Jabl, P_window, C_window)
+        P_mat = np.multiply(coef, np.transpose(mat))
+        Inm = np.sum(P_mat, 1)
+        return Inm, Ps
+
+    def _lowk_limits(self, k, P):
+        """Analytic low-k limit arrays L_nm(k) for the base integrals.
+        Returns a dict keyed by integral name; each value is an array over k."""
+        sig4 = np.trapezoid(k**2 * P**2, k)          # INT p^2 P_L^2 dp
+        pi2 = np.pi**2
+        return {
+            'I22':  sig4/(2*pi2),
+            'I23':  sig4/(2*pi2),
+            'I33':  sig4/(2*pi2),
+            'I44':  sig4 / (15*pi2),
+            'I55':  sig4 / (15*pi2),
+        }
+
+    def eft_00(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
+        """
+        Computes the one-loop EFT integrals for the density-density
+        power spectrum (arXiv:2303.15565).
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2)
+        """
+
+        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+
+        term = f"eft_00_lowk{int(remove_lowk)}_reg{int(regularize)}"
+        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
+        result = self.cache.get(term, hash_key)
+        if result is not None: return result
+
+        IA_coef = IA_EFT_coef()
+
+        I11, Ps = self._get_Inm(P, IA_coef[0], self.X_I11, -2, P_window=P_window, C_window=C_window)
+        I12, _ = self._get_Inm(P, IA_coef[1], self.X_I12, -2, P_window=P_window, C_window=C_window)
+        I13, _ = self._get_Inm(P, IA_coef[2], self.X_I13, -2, P_window=P_window, C_window=C_window)
+        I22, _ = self._get_Inm(P, IA_coef[3], self.X_I22, -2, P_window=P_window, C_window=C_window)
+        I23, _ = self._get_Inm(P, IA_coef[4], self.X_I23, -2, P_window=P_window, C_window=C_window)
+        I33, _ = self._get_Inm(P, IA_coef[6], self.X_I33, -2, P_window=P_window, C_window=C_window)
+
+        if remove_lowk:
+            print("Removing low-k from predictions from analytical solution.")
+            L = self._lowk_limits(self.k_extrap, Ps)
+            I22 -= L['I22']
+            I23 -= L['I23']
+            I33 -= L['I33']
+            # I11, I12, I13: analytic limit is 0 -> nothing to subtract.
+
+        J1 = P_13_reg(self.k_extrap, Ps) / 2
+        J2 = J2_integral(self.k_extrap, Ps)
+
+        if not regularize:
+            print("WARNING: the unregularized version of I11 requires a higher n_padding for numerical convergence. Recommend increasing n_padding if necessary.")
+            I11, _ = self._get_Inm_tensor(P, IA_coef[0], self.X_I11_tensor, P_window=P_window, C_window=C_window)
+            J1 = J1_integral(self.k_extrap, Ps)
+
+        (I11, I12, I13, I22, I23, I33, J1, J2) = self._apply_extrapolation(
+            I11, I12, I13, I22, I23, I33, J1, J2)
+
+        result = (I11, I12, I13, I22, I23, I33, J1, J2)
+        self.cache.set(result, term, hash_key, P_hash)
+        return result
+
+    def eft_02(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
+        """
+        Computes the one-loop EFT integrals for the density-shape cross-spectrum: 
+        the density-density integrals of eft_00 plus the cross terms I14, I24, I34 and J3.
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3)
+        """
+
+        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+
+        term = f"eft_02_lowk{int(remove_lowk)}_reg{int(regularize)}"
+        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
+        result = self.cache.get(term, hash_key)
+        if result is not None: return result
+
+        (I11, I12, I13, I22, I23, I33, J1, J2) = self.eft_00(
+            P, P_window=P_window, C_window=C_window, remove_lowk=remove_lowk, regularize=regularize)
+
+        IA_coef = IA_EFT_coef()
+
+        Ps, _ = self.J_k_scalar(P, self.X_I11, -2, P_window=P_window, C_window=C_window)
+
+        I24, _ = self._get_Inm(P, IA_coef[5], self.X_I24, -2, P_window=P_window, C_window=C_window)
+        I34, _ = self._get_Inm(P, IA_coef[7], self.X_I34, -2, P_window=P_window, C_window=C_window)
+
+        I24 /= self.k_extrap ** 2
+        I34 /= self.k_extrap ** 2
+        # I24, I34 -> analytic limit is O(k^2), no constant to subtract.
+
+        J3 = J3_integral(self.k_extrap, Ps)
+
+        (I24, I34, J3) = self._apply_extrapolation(I24, I34, J3)
+
+        I14 = ((28 * I12 - I22 + I23) / 2 / np.sqrt(6) - 5 * I24 + 5 * I34) / 7
+
+        result = (I11, I12, I13, I22, I23, I33, J1, J2,
+                  I14, I24, I34, J3)
+        self.cache.set(result, term, hash_key, P_hash)
+        return result
+
+    def eft_22(self, P, P_window=None, C_window=None, remove_lowk=True, regularize=True):
+        """
+        Computes the one-loop EFT integrals for the shape-shape power spectrum (arXiv:2303.15565):
+        the integrals of eft_02 plus I44, I55, I66, I67, I77.
+
+        Returns
+        -------
+        tuple
+            (I11, I12, I13, I22, I23, I33, J1, J2,
+             I14, I24, I34, J3,
+             I44, I55, I66, I67, I77)
+        """
+
+        self._validate_params(P=P, P_window=P_window, C_window=C_window)
+
+        term = f"eft_22_lowk{int(remove_lowk)}_reg{int(regularize)}"
+        hash_key, P_hash = self._create_hash_key(term, self.X_I11, P, P_window, C_window)
+        result = self.cache.get(term, hash_key)
+        if result is not None: return result
+
+        (I11, I12, I13, I22, I23, I33, J1, J2,
+         I14, I24, I34, J3) = self.eft_02(
+            P, P_window=P_window, C_window=C_window, remove_lowk=remove_lowk, regularize=regularize)
+
+        IA_coef = IA_EFT_coef()
+
+        Ps, _ = self.J_k_scalar(P, self.X_I11, -2, P_window=P_window, C_window=C_window)
+
+        I44, _ = self._get_Inm(P, IA_coef[8], self.X_I44, -1.6, P_window=P_window, C_window=C_window)
+        I55, _ = self._get_Inm(P, IA_coef[9], self.X_I55, -1.6, P_window=P_window, C_window=C_window)
+
+        I44 /= self.k_extrap ** 4
+        I55 /= self.k_extrap ** 4
+
+        if remove_lowk:
+            L = self._lowk_limits(self.k_extrap, Ps)
+            I44 -= L['I44']
+            I55 -= L['I55']
+
+        (I44, I55) = self._apply_extrapolation(I44, I55)
+
+        I66 = I22 / 9 - np.sqrt(6) / 9 * I24 + I44 / 6
+        I67 = I22 / 36 + I23 / 12 - 5 * np.sqrt(6) / 72 * I24 - np.sqrt(6) / 24 * I34 + I44 / 6
+        I77 = I22 / 144 + I23 / 24 + I33 / 16 - np.sqrt(6) * I24 / 36 - np.sqrt(6) * I34 / 12 + I44 / 6
+
+        result = (I11, I12, I13, I22, I23, I33, J1, J2,
+                  I14, I24, I34, J3,
+                  I44, I55, I66, I67, I77)
+        self.cache.set(result, term, hash_key, P_hash)
+        return result
+
     def _get_P_deltaE2(self, P):
         hash_key, P_hash = self._create_hash_key("P_deltaE2", None, P, None, None)
         result = self.cache.get("P_deltaE2", hash_key)
