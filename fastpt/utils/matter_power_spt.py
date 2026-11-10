@@ -155,7 +155,7 @@ def one_loop(k,P,P_window=None,C_window=None,n_pad=None):
 
 def J1_integral(k, P):
 	# calculates the unregularized J_1 integral in the EFT of IA
-	# via a discrete convolution integral (kernel K_1^J, Eq. A.3)
+	# via a discrete convolution integral
 
 	N = k.size
 	n = np.arange(-N+1, N)
